@@ -16,25 +16,18 @@ function nexus(options) {
     req.socket.setTimeout(options.request.socket.timeout);
     var serveFile = options.routes[req.method][req.url];
     if (req.url == '/favicon.ico') {
-      console.log("Favicon");
       serveStatic(res, cache, options.favicon, options);
     } else if (requestInRoute(req.url, req.method, options)) {
-      
       if (req.method == "POST") {
-        console.log("Post Compilation");
         compilePost(req, res, cache, options);
       }
-      console.log("Request in Route");
       serveStatic(res, cache, serveFile, options);
     } else if (serveFile === undefined) {
       // Not a planned route
-      console.log("Unplanned route " + serveFile);
       serveStatic(res, cache, req.url, options);
     } else {
-      console.log("serve known route");
       serveStatic(res, cache, serveFile, options);
     }
-    
   });
   server.listen(options.port);
 } 
@@ -99,37 +92,29 @@ function cacheStatic(dirs) {
 }
 
 function sendFile(response, filePath, fileContents) {
-  console.log("Sending file " + filePath);
   response.writeHead(200, {"Content-Type": mime.lookup(path.basename(filePath))});
   response.end(fileContents)
 }
 
 function serveStatic(response, cache, absPath, options) {
-  console.log("Serving " + absPath);
   if (cache.get(absPath) !== undefined) {
-    console.log("IN cache");
     sendFile(response, absPath, cache.get(absPath));
   }
   else {
-    console.log("Not In Cache.");
     fs.exists(absPath, function(exists) {
-      console.log(absPath + " exists: " + exists);
       if (exists) {
         fs.readFile(absPath, function(err, data) {
           if (err) {
-            console.log(err);
             sendFile(response, options.codes[404], 
                      cache.get(options.codes[404]));
           } 
           else {
-            console.log("Caching " + absPath);
             cache.set(absPath, data);
             sendFile(response, absPath, data);
           }
         });
       }
       else {
-        console.log(absPath);
         // Determine if this is an external url
         if (absPath.substring(0, 7) == "http://" || absPath.substring(0, 4) == "www.") { 
           redirect(response, absPath);

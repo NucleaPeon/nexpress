@@ -1,0 +1,24 @@
+{
+  "name": "nexpress",
+  "version": "0.0.1",
+  "description": "Not express.js, a quickstart module for serving web content",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NucleaPeon/nexpress"
+  },
+  "keywords": [
+    "nodejs",
+    "express"
+  ],
+  "author": "Daniel Kettle <initial.dann@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NucleaPeon/nexpress/issues"
+  },
+  "homepage": "https://github.com/NucleaPeon/nexpress",
+  "dependencies": {}
+}

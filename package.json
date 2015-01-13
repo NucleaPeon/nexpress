@@ -1,6 +1,6 @@
 {
   "name": "nexpress",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Not express.js, a quickstart module for serving web content",
   "main": "index.js",
   "scripts": {
@@ -20,5 +20,9 @@
     "url": "https://github.com/NucleaPeon/nexpress/issues"
   },
   "homepage": "https://github.com/NucleaPeon/nexpress",
-  "dependencies": {}
+  "dependencies": {
+    "js-cache": "~1.0.2",
+    "http": "*",
+    "mime-types": "*"
+  }
 }

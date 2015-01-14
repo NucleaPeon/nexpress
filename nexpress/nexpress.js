@@ -45,12 +45,10 @@ function compilePost(request, response, cache, options, callback) {
     request.body = form;
     if (callback === undefined) {
       // So we can detect the actual file relatively
-      console.log("Respond with page " + options.routes[request.method][request.url]);
       serveStatic(response, cache, options.routes[request.method][request.url],
                   options);
     }
     else {
-      console.log("Using User-Defined Post Function");
       callback(response, form, prepend, append);
     }
   });
@@ -105,8 +103,9 @@ function serveStatic(response, cache, absPath, options) {
       if (exists) {
         fs.readFile(absPath, function(err, data) {
           if (err) {
-            sendFile(response, options.codes[404], 
-                     cache.get(options.codes[404]));
+            console.log(err);
+            serveStatic(response, cache, options.codes[404], 
+                     options);
           } 
           else {
             cache.set(absPath, data);
@@ -120,8 +119,8 @@ function serveStatic(response, cache, absPath, options) {
           redirect(response, absPath);
         }
         else {
-          sendFile(response, options.codes[404], 
-                 cache.get(options.codes[404]));
+          serveStatic(response, cache, options.codes[404], 
+                     options);
         }
       }
     });

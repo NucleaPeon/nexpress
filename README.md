@@ -24,8 +24,8 @@ Personally, I have found the documentation and tutorials written for express.js 
             }
         },
         codes: {
-            404: "./errors/404.html",
-            403: "./errors/403.html"
+            404: "/errors/404.html",
+            403: "/errors/403.html"
         },
         static: [
             // Paths are absolute when hosted

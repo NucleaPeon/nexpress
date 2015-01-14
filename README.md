@@ -27,7 +27,8 @@ Personally, I have found the documentation and tutorials written for express.js 
                   "/": "./public/index.html",
             },
             POST: { 
-              "/login": "./auth/dashboard.html",
+              // "/login" pulls data from the cache where /auth/dashboard template is stored
+              "/login": "/auth/dashboard.html",
               "/logout": "http://www.google.com/"
             }
         },

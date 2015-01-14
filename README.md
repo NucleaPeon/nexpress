@@ -7,7 +7,7 @@ Personally, I have found the documentation and tutorials written for express.js 
 
 ### Recent Updates
 
-* 01/14/2015:  Added template functionality (similar to SSI) to enable pages compiled from multiple sources
+* 01/14/2015:  Added template functionality (similar to SSI) to enable pages compiled from multiple sources. Use template keys as routes.
 
 ### Example Options and Instantiation
 
@@ -27,8 +27,8 @@ Personally, I have found the documentation and tutorials written for express.js 
                   "/": "./public/index.html",
             },
             POST: { 
-              // "/login" pulls data from the cache where /auth/dashboard template is stored
-              "/login": "/auth/dashboard.html",
+              // Use template route instead of static page
+              "/login": "/auth/dashboard",
               "/logout": "http://www.google.com/"
             }
         },

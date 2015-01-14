@@ -46,9 +46,21 @@ function compilePost(request, response, cache, options, callback) {
     var form = querystring.parse(fullBody);
     request.body = form;
     if (callback === undefined) {
+      console.log(request.url);
+      console.log(options.routes[request.method][request.url])
+      console.log(options.templates[options.routes[request.method][request.url]]);
       // So we can detect the actual file relatively
-      serveStatic(response, cache, options.routes[request.method][request.url],
+      if (options.routes[request.method][request.url] !== undefined) {
+        serveStatic(response, cache, options.routes[request.method][request.url],
                   options);
+      }
+      else if (options.templates[request.url] !== undefined) {
+        serveStatic(response, cache, options.templates[request.url], options);
+      }
+      else {
+        serveStatic(response, cache, options.codes[404], 
+                     options);
+      }
     }
     else {
       callback(response, form, prepend, append);

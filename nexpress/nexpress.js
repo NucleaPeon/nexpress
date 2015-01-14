@@ -26,6 +26,7 @@ function nexus(options) {
       // Not a planned route
       serveStatic(res, cache, req.url, options);
     } else {
+      // ServeFile is known and we GET it
       serveStatic(res, cache, serveFile, options);
     }
   });
@@ -103,6 +104,7 @@ function serveStatic(response, cache, absPath, options) {
       if (exists) {
         fs.readFile(absPath, function(err, data) {
           if (err) {
+            //FIXME: Take error code out of err and use it for option codes.
             console.log(err);
             serveStatic(response, cache, options.codes[404], 
                      options);
@@ -119,6 +121,7 @@ function serveStatic(response, cache, absPath, options) {
           redirect(response, absPath);
         }
         else {
+          // Not found
           serveStatic(response, cache, options.codes[404], 
                      options);
         }

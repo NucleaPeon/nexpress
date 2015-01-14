@@ -11,6 +11,7 @@ function nexus(options) {
   
   // Append the dot for relative
   cacheStatic(options.static);
+  buildTemplates(options.templates);
   
   var server =  http.createServer(function (req, res) { 
     req.socket.setTimeout(options.request.socket.timeout);
@@ -127,5 +128,18 @@ function serveStatic(response, cache, absPath, options) {
         }
       }
     });
+  }
+}
+
+function buildTemplates(templates) {
+  var keys = Object.keys(templates);
+  var body = '';
+  for (var i=0; i < keys.length; i++) {
+    for (var j=0; j < templates[keys[i]].length; j++) {
+      // j represents files in the template definition
+      body += fs.readFileSync(templates[keys[i]][j]);
+    }
+    cache.set(keys[i], body);
+    body = '';
   }
 }

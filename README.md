@@ -5,6 +5,10 @@ Not express.js: An easier to use starting module for serving web content
 
 Personally, I have found the documentation and tutorials written for express.js to be unsatisfactory. nexpress.js is a simple, straightforward way to get a functional website up without having to read up on _how_ everything fits together. It also frees up the user to focus on how their site works.
 
+### Recent Updates
+
+* 01/14/2015:  Added template functionality (similar to SSI) to enable pages compiled from multiple sources
+
 ### Example Options and Instantiation
 
     var options = {
@@ -13,6 +17,10 @@ Personally, I have found the documentation and tutorials written for express.js 
             socket: {
                 timeout: 20000 
             }
+        },
+        templates: {
+            "/auth/dashboard": ["./auth/dashboard.html"],
+            "/test": ["header.html", "testbody.txt", "footer.html"]
         },
         routes: {
             GET: {

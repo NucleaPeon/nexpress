@@ -93,7 +93,8 @@ var file = require('file');
 
             var port = this.options.port;
 
-            return {route: function(target, path) {
+            return {route: function(target, path, method) {
+                        // TODO: method (GET, POST, "*"), default to both
                         routes[path] = target;
                     },
                     routes: function() {
@@ -110,6 +111,10 @@ var file = require('file');
                         }
                         return server.listen(port);
                     },
+                    favicon: function(path) {
+                        // Convenience method for specifying a favicon
+                        routes["/favicon.ico"] = path;
+                    },
                     redirect: function(route, url) {
                         redirects[route] = url;
                     },
@@ -117,8 +122,6 @@ var file = require('file');
                         return redirects;
                     },
                     staticDir: function(folder) {
-                        var splitpath = folder.split(path.sep)
-                        // walk this dir:: splitpath[splitpath.length - 2];
                         file.walk(folder, function(ds, acc, m, cb) {
                             //files = cb.split(",");
                             for (var i=0; i < cb.length; i++) {

@@ -8,6 +8,7 @@ var fs = require('fs');
 var querystring = require('querystring');
 var ssi = require('ssi');
 var file = require('file');
+var cache = require('js-cache');
 
 /**
  * @constructor
@@ -27,7 +28,9 @@ var file = require('file');
         /** Define public methods: **/
 
         this.options = {port: 8080,
-            routes: {"/" : "index.html"}
+            routes: {"/" : "index.html"},
+            timeout: 25000,
+            cacheTime: undefined
         };
         if (options !== undefined) {
             var keys = Object.keys(options);
@@ -38,6 +41,21 @@ var file = require('file');
 
         this.routes = {};
         this.redirects = {}
+
+        this.cacheTime = function(time) {
+            this.options.cacheTime = time;
+            console.log(this.options.cacheTime);
+        }
+
+        this.cachePage = function(path) {
+            console.log(path + ", " + this.options.cacheTime);
+        }
+
+        this.requestTimeout = function(time) {
+            this.options.timeout = time;
+            console.log(this.options.timeout);
+        }
+
         /**
          * http
          *
@@ -49,6 +67,8 @@ var file = require('file');
          *
          */
         this.http = function() {
+            var reqTimeout = this.options.timeout;
+
             this.redirection = function(url, res) {
                 var body = 'Redirecting to ' + url;
                 res.writeHead(302, {
@@ -60,7 +80,8 @@ var file = require('file');
             };
 
             var server = http.createServer(function (req, res) {
-                console.log("Check routes " + req.url);
+                req.setTimeout(reqTimeout);
+                console.log(reqTimeout);
                 var url = req.url;
                 if (routes[url] !== undefined || redirects[url] !== undefined) {
                     // TODO: Cache fetching, file fetching, redirection, etc.
@@ -93,9 +114,12 @@ var file = require('file');
 
             var port = this.options.port;
 
-            return {route: function(target, path, method) {
+            return {route: function(target, path, method, cacheTime) {
                         // TODO: method (GET, POST, "*"), default to both
                         routes[path] = target;
+                        if (cacheTime !== undefined) {
+                            cacheTime(path, cacheTime);
+                        }
                     },
                     routes: function() {
                         // Report routes
@@ -111,9 +135,12 @@ var file = require('file');
                         }
                         return server.listen(port);
                     },
-                    favicon: function(path) {
+                    favicon: function(path, cacheTime) {
                         // Convenience method for specifying a favicon
                         routes["/favicon.ico"] = path;
+                        if (cacheTime !== undefined) {
+                            cachePage("/favicon.ico", cacheTime);
+                        }
                     },
                     redirect: function(route, url) {
                         redirects[route] = url;
@@ -121,7 +148,7 @@ var file = require('file');
                     redirects: function() {
                         return redirects;
                     },
-                    staticDir: function(folder) {
+                    staticDir: function(folder, cacheTime) {
                         file.walk(folder, function(ds, acc, m, cb) {
                             //files = cb.split(",");
                             for (var i=0; i < cb.length; i++) {
@@ -132,13 +159,20 @@ var file = require('file');
                                 }
                                 else if (cb[i].substring(0, 1) == path.sep) {
                                     routes[cb[i]] = cb[i];
+
                                 }
                                 else {
                                     routes[path.sep + cb[i]] = cb[i];
                                 }
+                                // cache if not hidden file and cacheTime specified
+                                if (cacheTime !== undefined) {
+                                    cachePage(cb[i], cacheTime);
+                                    routes[cb[i]] = cb[i];
+                                }
                             }
                         });
                     }
+
             }
         }
 

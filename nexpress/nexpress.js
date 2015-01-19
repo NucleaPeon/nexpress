@@ -48,29 +48,40 @@ var ssi = require('ssi');
          *
          */
         this.http = function() {
+            this.redirection = function(url, res) {
+                var body = 'Redirecting to ' + url;
+                res.writeHead(302, {
+                    'Content-Type': 'text/plain',
+                    'Location': url,
+                    'Content-Length': body.length
+                });
+                res.end(body);
+            };
+
             var server = http.createServer(function (req, res) {
                 console.log("Check routes " + req.url);
-                if (routes[req.url] !== undefined || redirects[req.url] !== undefined) {
+                var url = req.url;
+                if (routes[url] !== undefined || redirects[url] !== undefined) {
                     // TODO: Cache fetching, file fetching, redirection, etc.
-                    console.log("redirecting");
-                    if (redirects[req.url] !== undefined) {
-                        var body = 'Redirecting to ' + redirects[req.url];
-                        res.writeHead(302, {
-                            'Content-Type': 'text/plain',
-                            'Location': redirects[req.url],
-                            'Content-Length': body.length
-                        });
-                        res.end(body);
+                    if (redirects[url] !== undefined) {
+                        console.log("redirecting " + redirects[url]);
+                        redirection(redirects[url], res);
                     }
                     else {
                         console.log("not redirecting");
-                        // Fetch as a file
-                        var res = res;
-                        fs.readFile(routes[req.url], function(err, data) {
-                            if (err) throw err;
-                            res.writeHead(200, {"Content-Type": "text/html"})
-                            res.end(data);
-                        });
+                        if (routes[url].substring(0, 7) == "http://" || routes[url].substring(0, 4) == "www.") {
+                            console.log("redirecting");
+                            redirection(routes[url], res);
+                        }
+                        else {
+                            // Fetch as a file
+                            // Leave req.url as req.url, not "url" as it may have been modified.
+                            fs.readFile(routes[req.url], function(err, data) {
+                                if (err) throw err;
+                                res.writeHead(200, {"Content-Type": "text/html"})
+                                res.end(data);
+                            });
+                        }
                     }
                 }
                 else {
@@ -82,8 +93,8 @@ var ssi = require('ssi');
 
             var port = this.options.port;
 
-            return {route: function(file, path) {
-                        routes[path] = file;
+            return {route: function(target, path) {
+                        routes[path] = target;
                     },
                     routes: function() {
                         // Report routes

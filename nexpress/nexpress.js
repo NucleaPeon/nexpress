@@ -7,6 +7,7 @@ var path = require('path');
 var fs = require('fs');
 var querystring = require('querystring');
 var ssi = require('ssi');
+var file = require('file');
 
 /**
  * @constructor
@@ -74,11 +75,10 @@ var ssi = require('ssi');
                             redirection(routes[url], res);
                         }
                         else {
-                            // Fetch as a file
-                            // Leave req.url as req.url, not "url" as it may have been modified.
+                            // Fetch as a file, determine file mimetype
                             fs.readFile(routes[req.url], function(err, data) {
                                 if (err) throw err;
-                                res.writeHead(200, {"Content-Type": "text/html"})
+                                res.writeHead(200, {"Content-Type": mime.lookup(path.basename(routes[req.url]))})
                                 res.end(data);
                             });
                         }
@@ -115,6 +115,23 @@ var ssi = require('ssi');
                     },
                     redirects: function() {
                         return redirects;
+                    },
+                    staticDir: function(folder) {
+                        var splitpath = folder.split(path.sep)
+                        // walk this dir:: splitpath[splitpath.length - 2];
+                        file.walk(folder, function(ds, acc, m, cb) {
+                            //files = cb.split(",");
+                            for (var i=0; i < cb.length; i++) {
+                                // In the edge case user specifies root folder,
+                                // do not append path.sep to route.
+                                if (cb[i].substring(0, 1) == path.sep) {
+                                    routes[cb[i]] = cb[i];
+                                }
+                                else {
+                                    routes[path.sep + cb[i]] = cb[i];
+                                }
+                            }
+                        });
                     }
             }
         }
@@ -142,6 +159,7 @@ var ssi = require('ssi');
          * @param matcher
          **/
         this.ssi = function(input, output, matcher) {
+            console.log("Setting up ssi");
             var includes = new ssi(input, output, matcher);
             includes.compile();
         }

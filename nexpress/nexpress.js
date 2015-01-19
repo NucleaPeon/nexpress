@@ -13,7 +13,15 @@ var ssi = require('ssi');
  * Define and export the nexus function
  **/
 (function () {
-    /** @constructor **/
+    /**
+     * This function automatically associates "/" route with
+     * "./index.html". This can be overwritten using
+     * http.route("./anotherfile.html", "/"); and is purely for
+     * convenience.
+     *
+     * Port defaults to 8080 unless otherwise set.
+     *
+     * @constructor **/
     var nexus = function(options) {
         /** Define public methods: **/
 
@@ -28,7 +36,7 @@ var ssi = require('ssi');
         }
 
         this.routes = {};
-        console.log(this.options);
+        this.redirects = {}
         /**
          * http
          *
@@ -43,14 +51,26 @@ var ssi = require('ssi');
             var server = http.createServer(function (req, res) {
                 if (routes[req.url] !== undefined) {
                     // TODO: Cache fetching, file fetching, redirection, etc.
-
-                    // Fetch as a file
-                    var res = res;
-                    fs.readFile(routes[req.url], function(err, data) {
-                        if (err) throw err;
-                        res.writeHead(200, {"Content-Type": "text/html"})
-                        res.end(data);
-                    });
+                    console.log("redirecting");
+                    if (redirects[req.url] !== undefined) {
+                        var body = 'Redirecting to ' + redirects[req.url];
+                        res.writeHead(302, {
+                            'Content-Type': 'text/plain',
+                            'Location': redirects[req.url],
+                            'Content-Length': body.length
+                        });
+                        res.end(body);
+                    }
+                    else {
+                        console.log("not redirecting");
+                        // Fetch as a file
+                        var res = res;
+                        fs.readFile(routes[req.url], function(err, data) {
+                            if (err) throw err;
+                            res.writeHead(200, {"Content-Type": "text/html"})
+                            res.end(data);
+                        });
+                    }
                 }
                 else {
                     res.writeHead(404, {"Content-Type": "text/html"});
@@ -79,14 +99,10 @@ var ssi = require('ssi');
                         return server.listen(port);
                     },
                     redirect: function(route, url) {
-                        var body = 'Redirecting to ' + url;
-                        /**response.writeHead(302, {
-                            'Content-Type': 'text/plain',
-                            'Location': url,
-                            'Content-Length': body.length
-                        });
-                        response.end(body);**/
-                        console.log("REDIRECT TODO " + url);
+                        redirects[route] = url;
+                    },
+                    redirects: function() {
+                        return redirects;
                     }
             }
         }

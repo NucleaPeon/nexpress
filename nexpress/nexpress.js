@@ -49,7 +49,8 @@ var ssi = require('ssi');
          */
         this.http = function() {
             var server = http.createServer(function (req, res) {
-                if (routes[req.url] !== undefined) {
+                console.log("Check routes " + req.url);
+                if (routes[req.url] !== undefined || redirects[req.url] !== undefined) {
                     // TODO: Cache fetching, file fetching, redirection, etc.
                     console.log("redirecting");
                     if (redirects[req.url] !== undefined) {

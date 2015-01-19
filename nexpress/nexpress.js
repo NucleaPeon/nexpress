@@ -1,157 +1,125 @@
-exports = module.exports = nexus;
-// Requires
+/**
+ * Require Statements:
+ * */
 var http = require('http');
-var fs = require('fs');
-var cache = require('js-cache');
 var mime = require('mime-types');
 var path = require('path');
+var fs = require('fs');
 var querystring = require('querystring');
+var ssi = require('ssi');
 
-function nexus(options) {
-  
-  // Append the dot for relative
-  cacheStatic(options.static);
-  buildTemplates(options.templates);
-  
-  var server =  http.createServer(function (req, res) { 
-    req.socket.setTimeout(options.request.socket.timeout);
-    var serveFile = options.routes[req.method][req.url];
-    if (req.url == '/favicon.ico') {
-      serveStatic(res, cache, options.favicon, options);
-    } else if (requestInRoute(req.url, req.method, options)) {
-      if (req.method == "POST") {
-        compilePost(req, res, cache, options);
-      }
-      serveStatic(res, cache, serveFile, options);
-    } else if (serveFile === undefined) {
-      // Not a planned route
-      serveStatic(res, cache, req.url, options);
-    } else {
-      // ServeFile is known and we GET it
-      serveStatic(res, cache, serveFile, options);
-    }
-  });
-  server.listen(options.port);
-} 
+/**
+ * @constructor
+ * Define and export the nexus function
+ **/
+(function () {
+    /** @constructor **/
+    var nexus = function(options) {
+        /** Define public methods: **/
 
-function compilePost(request, response, cache, options, callback) {
-  var fullBody = '';
-  request.on('data', function(chunk) {
-    fullBody += chunk.toString();
-    if (fullBody.length > 1e6) {
-      request.connection.destroy();
-    }
-  });
-  request.on('end', function() {
-    var form = querystring.parse(fullBody);
-    request.body = form;
-    if (callback === undefined) {
-      console.log(request.url);
-      console.log(options.routes[request.method][request.url])
-      console.log(options.templates[options.routes[request.method][request.url]]);
-      // So we can detect the actual file relatively
-      if (options.routes[request.method][request.url] !== undefined) {
-        serveStatic(response, cache, options.routes[request.method][request.url],
-                  options);
-      }
-      else if (options.templates[request.url] !== undefined) {
-        serveStatic(response, cache, options.templates[request.url], options);
-      }
-      else {
-        serveStatic(response, cache, options.codes[404], 
-                     options);
-      }
-    }
-    else {
-      callback(response, form, prepend, append);
-    }
-  });
-  
-}
-
-function redirect(response, url) {
-  var body = 'Redirecting to ' + url;
-  response.writeHead(302, {
-    'Content-Type': 'text/plain',
-    'Location': url,
-    'Content-Length': body.length
-  });
-  response.end(body);
-}
-
-function requestInRoute(route, request, options) {
-  var keys = Object.keys(options.routes[request]);
-  for(var i = 0; i < keys.length; i++) {
-    if(keys[i] == route) 
-      return true;
-  } return false;
-}
-
-/** Cache all static directories that are submitted into the nexus:
- * Every non-hidden file (starting with a ".") is cached.
- * 
- * 
- */
-function cacheStatic(dirs) {
-  for(var i = 0; i < dirs.length; i++) {
-    files = fs.readdirSync(dirs[i]);
-    for(var j = 0; j < files.length; j++) {
-      if (files[j][0] != ".") {
-        cache.set(dirs[i].substring(1, dirs[i].length) + files[j], fs.readFileSync(dirs[i] + files[j]));
-      }
-    }
-  }
-}
-
-function sendFile(response, filePath, fileContents) {
-  response.writeHead(200, {"Content-Type": mime.lookup(path.basename(filePath))});
-  response.end(fileContents)
-}
-
-function serveStatic(response, cache, absPath, options) {
-  if (cache.get(absPath) !== undefined) {
-    sendFile(response, absPath, cache.get(absPath));
-  }
-  else {
-    fs.exists(absPath, function(exists) {
-      if (exists) {
-        fs.readFile(absPath, function(err, data) {
-          if (err) {
-            //FIXME: Take error code out of err and use it for option codes.
-            console.log(err);
-            serveStatic(response, cache, options.codes[404], 
-                     options);
-          } 
-          else {
-            cache.set(absPath, data);
-            sendFile(response, absPath, data);
-          }
-        });
-      }
-      else {
-        // Determine if this is an external url
-        if (absPath.substring(0, 7) == "http://" || absPath.substring(0, 4) == "www.") { 
-          redirect(response, absPath);
+        this.options = {port: 8080,
+            routes: {"/" : "index.html"}
+        };
+        if (options !== undefined) {
+            var keys = Object.keys(options);
+            for (var i=0; i < keys.length; i++) {
+                this.options[keys[i]] = options[keys[i]];
+            }
         }
-        else {
-          // Not found
-          serveStatic(response, cache, options.codes[404], 
-                     options);
-        }
-      }
-    });
-  }
-}
 
-function buildTemplates(templates) {
-  var keys = Object.keys(templates);
-  var body = '';
-  for (var i=0; i < keys.length; i++) {
-    for (var j=0; j < templates[keys[i]].length; j++) {
-      // j represents files in the template definition
-      body += fs.readFileSync(templates[keys[i]][j]);
-    }
-    cache.set(keys[i], body);
-    body = '';
-  }
-}
+        this.routes = {};
+        console.log(this.options);
+        /**
+         * http
+         *
+         * Call .listen() on the server once it is returned to start.
+         * Default port: 8080
+         *
+         * @returns http server.listen(port) as a function. Preset so no
+         *          parameters are required to launch at specified port.
+         *
+         */
+        this.http = function() {
+            var server = http.createServer(function (req, res) {
+                if (routes[req.url] !== undefined) {
+                    // TODO: Cache fetching, file fetching, redirection, etc.
+
+                    // Fetch as a file
+                    var res = res;
+                    fs.readFile(routes[req.url], function(err, data) {
+                        if (err) throw err;
+                        res.writeHead(200, {"Content-Type": "text/html"})
+                        res.end(data);
+                    });
+                }
+                else {
+                    res.writeHead(404, {"Content-Type": "text/html"});
+                    res.end("Error: Page Not Found");
+                }
+
+            });
+
+            var port = this.options.port;
+
+            return {route: function(file, path) {
+                        routes[path] = file;
+                    },
+                    routes: function() {
+                        // Report routes
+                        return routes;
+                    },
+                    listen: function(newport) {
+                        // If param "newport" is not specified, give it port (option) or 8080
+                        if (newport === undefined) {
+                            if ( port === undefined ) { port = 8080; }
+                        }
+                        else {
+                            port = newport;
+                        }
+                        return server.listen(port);
+                    },
+                    redirect: function(route, url) {
+                        var body = 'Redirecting to ' + url;
+                        /**response.writeHead(302, {
+                            'Content-Type': 'text/plain',
+                            'Location': url,
+                            'Content-Length': body.length
+                        });
+                        response.end(body);**/
+                        console.log("REDIRECT TODO " + url);
+                    }
+            }
+        }
+
+        /**
+         * https
+         *
+         * Call .listen() on the server once it has returned to start.
+         * https is a secure, encrypted communication server.
+         **/
+        this.https = function() {
+            console.log("TODO: ssl https");
+        }
+
+        /**
+         * ssi
+         *
+         * Adds files within the input directory to the output directory.
+         * Files in the output directory can be used by ssi.
+         * Matcher will allow access to files based on the expression used
+         * ("*.html" allows only html files)
+         *
+         * @param input directory
+         * @param output directory
+         * @param matcher
+         **/
+        this.ssi = function(input, output, matcher) {
+            var includes = new ssi(input, output, matcher);
+            includes.compile();
+        }
+
+        return this;
+    };
+
+    module.exports = nexus;
+})();

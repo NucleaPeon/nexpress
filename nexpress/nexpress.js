@@ -124,7 +124,10 @@ var file = require('file');
                             for (var i=0; i < cb.length; i++) {
                                 // In the edge case user specifies root folder,
                                 // do not append path.sep to route.
-                                if (cb[i].substring(0, 1) == path.sep) {
+                                if (cb[i].substring(0, 1) == ".") {
+                                    continue;
+                                }
+                                else if (cb[i].substring(0, 1) == path.sep) {
                                     routes[cb[i]] = cb[i];
                                 }
                                 else {

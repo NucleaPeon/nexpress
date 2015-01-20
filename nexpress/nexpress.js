@@ -23,35 +23,78 @@ var cache = require('js-cache');
      *
      * Port defaults to 8080 unless otherwise set.
      *
+     * Nexus (nexpress) object contains the following notable methods:
+     *
+     *  - requestTimeout(time): Change default timeout for requests. This must
+     *    be called BEFORE the http server is created and cannot be changed once
+     *    set currently.
+     *
+     *  - cacheTime(time): Change default duration for content in cache
+     *
+     *  - http(): get web server
+     *
      * @constructor **/
     var nexus = function(options) {
         /** Define public methods: **/
 
-        this.options = {port: 8080,
-            routes: {"/" : "index.html"},
+        // DEFAULT OPTIONS
+        this.options = {
+            port: 8080,
             timeout: 25000,
-            cacheTime: undefined
+            cacheTime: undefined,
+            routes: {"GET": {},
+                     "POST": {}}
         };
-        if (options !== undefined) {
-            var keys = Object.keys(options);
-            for (var i=0; i < keys.length; i++) {
-                this.options[keys[i]] = options[keys[i]];
-            }
-        }
 
-        this.routes = {};
+        this.routes = {POST: {},
+                       GET: {"/" : "index.html"}};
+
         this.redirects = {}
+
+        this.setOptions = function(options) {
+            if (options !== undefined) {
+                var keys = Object.keys(options); // List of all user-supplied options
+                var innerKeys = []; // initialize for checking POST/GET
+                for (var i=0; i < keys.length; i++) {
+                    if (keys[i] == "routes") {
+                        var j = 0;
+                        if (options.routes.GET !== undefined) {
+                            innerKeys = Object.keys(options.routes.GET);
+                            for (; j < innerKeys.length; j++) {
+                                this.routes.GET[innerKeys[j]] = options.routes.GET[innerKeys[j]];
+                            }
+                        }
+                        j=0;
+                        innerKeys = [];
+                        if (options.routes.POST !== undefined) {
+                            innerKeys = Object.keys(options.routes.POST);
+                            for (; j < innerKeys.length; j++) {
+                                this.routes.POST[innerKeys[j]] = options.routes.POST[innerKeys[j]];
+
+                            }
+                        }
+                    } else {
+                        this.options[keys[i]] = options[keys[i]];
+                    }
+                }
+            }
+        };
+
+        // Handle option assignments
+        this.setOptions(options);
 
         this.cacheTime = function(time) {
             this.options.cacheTime = time;
-            console.log(this.options.cacheTime);
         }
 
         this.cachePage = function(path) {
+            // check if url, if not, read into cache
+            console.log("FIXME: " + path);
             console.log(path + ", " + this.options.cacheTime);
         }
 
         this.requestTimeout = function(time) {
+            console.log("Changing time");
             this.options.timeout = time;
             console.log(this.options.timeout);
         }
@@ -62,7 +105,30 @@ var cache = require('js-cache');
          * Call .listen() on the server once it is returned to start.
          * Default port: 8080
          *
-         * @returns http server.listen(port) as a function. Preset so no
+         * Methods that can be called within http object:
+         *      - route(target, path, cacheTime): create a route from the <path>
+         *        that will lead the user to the <target>, with optional cacheTime for
+         *        the content of the <target>.
+         *
+         *      - routes(): Return all routes in a json object
+         *
+         *      - listen(port): start the web server (http object). Specify a <port> or
+         *        leave unsubmitted to use the default (8080) or submitted option {port: [int]}
+         *
+         *      - favicon(path, cacheTime): convenience method for specifying the favicon using its
+         *        <path>. Specify optional <cacheTime>.
+         *        This method uses route() to create a "/favicon.ico" to the icon.
+         *
+         *      - redirect(route, url): When the user hits the <route> specified, redirect
+         *        to the <url>.
+         *        Example: redirect("/google", "http://www.google.com")
+         *
+         *      - redirects(): Returns all redirects in a json object.
+         *
+         *      - staticDir(folder, cacheTime): specify optional <cacheTime> for all files in <folder>.
+         *
+         *
+         * @returns http server.listen(port) as a function. Uses a preset so no
          *          parameters are required to launch at specified port.
          *
          */
@@ -79,25 +145,33 @@ var cache = require('js-cache');
                 res.end(body);
             };
 
+            this.calcPOST = function(req, res, cache, opts, cb) {
+
+            }
+
+            /**
+             * @constructor
+             *
+             * Contains the http server
+             */
             var server = http.createServer(function (req, res) {
                 req.setTimeout(reqTimeout);
-                console.log(reqTimeout);
                 var url = req.url;
-                if (routes[url] !== undefined || redirects[url] !== undefined) {
+                if (routes[req.method][url] !== undefined || redirects[url] !== undefined) {
                     // TODO: Cache fetching, file fetching, redirection, etc.
                     if (redirects[url] !== undefined) {
                         console.log("redirecting " + redirects[url]);
                         redirection(redirects[url], res);
                     }
                     else {
-                        console.log("not redirecting");
-                        if (routes[url].substring(0, 7) == "http://" || routes[url].substring(0, 4) == "www.") {
+                        if (routes[req.method][url].substring(0, 7) == "http://" || routes[req.method][url].substring(0, 4) == "www.") {
                             console.log("redirecting");
-                            redirection(routes[url], res);
+                            redirection(routes[req.method][url], res);
                         }
                         else {
+                            console.log("not redirecting");
                             // Fetch as a file, determine file mimetype
-                            fs.readFile(routes[req.url], function(err, data) {
+                            fs.readFile(routes[req.method][req.url], function(err, data) {
                                 if (err) throw err;
                                 res.writeHead(200, {"Content-Type": mime.lookup(path.basename(routes[req.url]))})
                                 res.end(data);
@@ -115,11 +189,13 @@ var cache = require('js-cache');
             var port = this.options.port;
 
             return {route: function(target, path, method, cacheTime) {
+                        var access = ("POST" == method) ? "POST" : "GET";
                         // TODO: method (GET, POST, "*"), default to both
-                        routes[path] = target;
+                        routes[access][path] = target;
                         if (cacheTime !== undefined) {
                             cacheTime(path, cacheTime);
                         }
+                        console.log(routes);
                     },
                     routes: function() {
                         // Report routes
@@ -137,7 +213,7 @@ var cache = require('js-cache');
                     },
                     favicon: function(path, cacheTime) {
                         // Convenience method for specifying a favicon
-                        routes["/favicon.ico"] = path;
+                        routes["GET"]["/favicon.ico"] = path;
                         if (cacheTime !== undefined) {
                             cachePage("/favicon.ico", cacheTime);
                         }
@@ -148,9 +224,10 @@ var cache = require('js-cache');
                     redirects: function() {
                         return redirects;
                     },
-                    staticDir: function(folder, cacheTime) {
+                    staticDir: function(folder, method, cacheTime) {
+                        var access = (method == "POST") ? "POST" : "GET";
                         file.walk(folder, function(ds, acc, m, cb) {
-                            //files = cb.split(",");
+                            // cb is list of files
                             for (var i=0; i < cb.length; i++) {
                                 // In the edge case user specifies root folder,
                                 // do not append path.sep to route.
@@ -158,16 +235,16 @@ var cache = require('js-cache');
                                     continue;
                                 }
                                 else if (cb[i].substring(0, 1) == path.sep) {
-                                    routes[cb[i]] = cb[i];
+                                    routes[access][cb[i]] = cb[i];
 
                                 }
                                 else {
-                                    routes[path.sep + cb[i]] = cb[i];
+                                    routes[access][path.sep + cb[i]] = cb[i];
                                 }
                                 // cache if not hidden file and cacheTime specified
                                 if (cacheTime !== undefined) {
                                     cachePage(cb[i], cacheTime);
-                                    routes[cb[i]] = cb[i];
+                                    routes[access][cb[i]] = cb[i];
                                 }
                             }
                         });
@@ -199,9 +276,7 @@ var cache = require('js-cache');
          * @param matcher
          **/
         this.ssi = function(input, output, matcher) {
-            console.log("Setting up ssi");
-            var includes = new ssi(input, output, matcher);
-            includes.compile();
+            new ssi(input, output, matcher).compile();
         }
 
         return this;

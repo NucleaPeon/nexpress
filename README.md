@@ -7,48 +7,38 @@ Personally, I have found the documentation and tutorials written for express.js 
 
 ### Recent Updates
 
+* 01/22/2015:  Reduced reliance on options, allowing more async performance
 * 01/14/2015:  Added template functionality (similar to SSI) to enable pages compiled from multiple sources. Use template keys as routes.
 
 ### Example Options and Instantiation
 
-    var options = {
-        port: 3000,
-        request: {
-            socket: {
-                timeout: 20000 
-            }
-        },
-        templates: {
-            "/auth/dashboard": ["./auth/dashboard.html"],
-            "/test": ["header.html", "testbody.txt", "footer.html"]
-        },
-        routes: {
-            GET: {
-                  "/": "./public/index.html",
-            },
-            POST: { 
-              // Use template route instead of static page
-              "/login": "/auth/dashboard",
-              "/logout": "http://www.google.com/"
-            }
-        },
-        codes: {
-            404: "/errors/404.html",
-            403: "/errors/403.html"
-        },
-        static: [
-            // Paths are absolute when hosted
-            "./public/", 
-            "./static/",
-            "./errors/"
-        ],
-        favicon: "./static/favicon.ico"
-    }
-
+    // options no longer required, defaults are set inside nexus
+    var options = {routes: {GET: {"/about": "about.html"}}};
     var nexus = require('nexpress')(options);
-    
+
+    // Set nexus options:
+    nexus.requestTimeout(100000);
+    nexus.ssi("ssi/", "generated/", "*.html");
+    nexus.cacheTime(360000);
+    nexus.cachePage("/favicon.ico"); // manual, optional caching
+
+    // Create http server:
+    var http = nexus.http();
+    http.staticDir("static"); // Serves an entire directory static pages through GET
+    http.favicon("./favicon.ico"); // Convenience method for favicon
+    http.get("./index.html", "/"); // GETS take [file target] [webserver path]
+    http.get("./404.html", "/404");
+    // path to external page (will be fixed later for consistency with other calls)
+    http.redirect("/google", "http://www.google.com");
+    http.get("http://www.google.com", "/g");
+
+    // Finally make server listen. Can specify port: http.listen(3000); or default to 8080
+    http.listen();
+
 In this code, you specify port, routes, static directories of files and a favicon without having any knowledge of the http module, data is up front.
 
-Error codes are managed automatically if they exist in the options.
+Error codes are managed automatically if they exist in the options. ( **TODO** )
 
 In later versions of nexpress I will include database connectors and authentication modules, as well as move options into their own file to reduce code clutter.
+
+Do not yet use this module in production.

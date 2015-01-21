@@ -35,8 +35,6 @@ var cache = require('js-cache');
      *
      * @constructor **/
     var nexus = function(options) {
-        /** Define public methods: **/
-
         // DEFAULT OPTIONS
         this.options = {
             port: 8080,
@@ -46,8 +44,10 @@ var cache = require('js-cache');
                      "POST": {}}
         };
 
+        //TODO: include functions for post here, cache time values and put into its own lib/module
         this.routes = {POST: {},
                        GET: {"/" : "index.html"}};
+        this.posts = {}; // {target: function}
 
         this.redirects = {}
 
@@ -145,8 +145,55 @@ var cache = require('js-cache');
                 res.end(body);
             };
 
-            this.calcPOST = function(req, res, cache, opts, cb) {
+            this._get = function(req, res, cb) {
+                fs.readFile(routes.GET[req.url], function(err, data) {
+                    if (err) throw err;
+                    res.writeHead(200, {"Content-Type": mime.lookup(path.basename(routes.GET[req.url]))})
+                    res.write(data);
+                    if (options.cacheTime !== undefined) {
+                        cache.set(req.url, data, options.cacheTime);
+                        console.log("Cached " + req.url);
+                    }
+                    cb(req, res);
+                });
+            };
 
+            this._post = function(req, res, cb) {
+                var fullBody = '';
+                req.on('data', function(chunk) {
+                    fullBody += chunk.toString();
+                    if (fullBody.length > 1e6) {
+                        req.connection.destroy();
+                    }
+                });
+                req.on('end', function() {
+                    var form = querystring.parse(fullBody);
+                    req.body = form;
+                    if(cb === undefined) {
+                        if(routes.POST[req.url] !== undefined) {
+                            fs.readFile(routes.POST[req.url], function(err, data) {
+                                if (err) {
+                                    res.writeHead(404, {"Content-Type": "text/plain"})
+                                    res.end("" + err);
+                                    throw err;
+                                }
+                                else {
+                                    res.writeHead(200, {"Content-Type": mime.lookup(path.basename(routes.POST[req.url]))})
+                                    res.end(data);
+                                }
+                            });
+                        }
+                        else {
+                            // Error message 404 in json
+                            res.writeHead(200, {"Content-Type": "application/json"})
+                            res.end({"error": "404"});
+                        }
+                    }
+                    else {
+                        console.log("Custom POST callback");
+                        cb(req, res, form);
+                    }
+                });
             }
 
             /**
@@ -157,27 +204,26 @@ var cache = require('js-cache');
             var server = http.createServer(function (req, res) {
                 req.setTimeout(reqTimeout);
                 var url = req.url;
-                if (routes[req.method][url] !== undefined || redirects[url] !== undefined) {
                     // TODO: Cache fetching, file fetching, redirection, etc.
-                    if (redirects[url] !== undefined) {
-                        console.log("redirecting " + redirects[url]);
-                        redirection(redirects[url], res);
-                    }
-                    else {
-                        if (routes[req.method][url].substring(0, 7) == "http://" || routes[req.method][url].substring(0, 4) == "www.") {
-                            console.log("redirecting");
-                            redirection(routes[req.method][url], res);
+                if (req.method == "GET") {
+                    if (routes[req.method][url] !== undefined || redirects[url] !== undefined) {
+                        if (redirects[url] !== undefined) {
+                            redirection(redirects[url], res);
                         }
                         else {
-                            console.log("not redirecting");
-                            // Fetch as a file, determine file mimetype
-                            fs.readFile(routes[req.method][req.url], function(err, data) {
-                                if (err) throw err;
-                                res.writeHead(200, {"Content-Type": mime.lookup(path.basename(routes[req.url]))})
-                                res.end(data);
-                            });
+                            if (routes.GET[url].substring(0, 7) == "http://" || routes.GET[url].substring(0, 4) == "www.") {
+                                redirection(routes.GET[url], res);
+                            }
+                            else {
+                                _get(req, res, function(req, res) {
+                                    res.end();
+                                });
+                            }
                         }
                     }
+                }
+                else if (req.method == "POST") {
+                    _post(req, res);
                 }
                 else {
                     res.writeHead(404, {"Content-Type": "text/html"});
@@ -188,14 +234,18 @@ var cache = require('js-cache');
 
             var port = this.options.port;
 
-            return {route: function(target, path, method, cacheTime) {
-                        var access = ("POST" == method) ? "POST" : "GET";
-                        // TODO: method (GET, POST, "*"), default to both
-                        routes[access][path] = target;
+            return {get: function(target, path, cacheTime) {
+                        routes.GET[path] = target;
                         if (cacheTime !== undefined) {
                             cacheTime(path, cacheTime);
                         }
-                        console.log(routes);
+                    },
+                    post: function(target, path, callback, cacheTime) {
+                        routes.POST[path] = target;
+                        if (cacheTime !== undefined) {
+                            cacheTime(path, cacheTime);
+                        }
+                        posts.path = callback;
                     },
                     routes: function() {
                         // Report routes

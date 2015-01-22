@@ -23,8 +23,14 @@ It also frees up the user to focus on how their site works.
     http.favicon("./static/favicon.ico");
 
     nexus.get.route("/", "./public/index.html");
-    
-    http.listen();
+    nexus.get.route("/404", "./errors/404.html");
 
+    http.listen(3000); // Defaults to 8080
 
-Code is changing frequently, not recommended for use in production environments.
+### Run Tests
+
+    npm test
+
+This depends on Mocha, you may have to re-run `npm install https://github.com/NucleaPeon/nexpress.git` to pull extra deps in.
+
+**Code is changing frequently, not recommended for use in production environments.**

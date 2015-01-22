@@ -27,6 +27,21 @@ It also frees up the user to focus on how their site works.
 
     http.listen(3000); // Defaults to 8080
 
+Optional Instantiation of nexpress:
+
+`package.json`
+
+    ...
+    "dependencies": {
+        "nexpress": "NucleaPeon/nexpress"
+    },
+    ...
+
+`(starting .js file)`
+
+    var nexus = require('nexpress');
+
+
 ### Run Tests
 
     npm test

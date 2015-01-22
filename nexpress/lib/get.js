@@ -106,9 +106,9 @@ var file = require('file');
         }
 
         this.staticDir = function(folder, alias, cacheTime) {
-            var a = alias;
+            var a = (alias === undefined) ? "" : alias;
             var filename = '';
-            if (a.substring(0, 1) != path.sep) {
+            if ((a.length > 0) && (a.substring(0, 1) != path.sep)) {
                 a = path.sep + alias;
             }
             file.walk(folder, function(n, dirPath, dirs, files) {

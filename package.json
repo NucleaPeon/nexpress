@@ -1,10 +1,10 @@
 {
   "name": "nexpress",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Not express.js, a quickstart module for serving web content",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test.js -R list"
   },
   "repository": {
     "type": "git",
@@ -22,10 +22,14 @@
   "homepage": "https://github.com/NucleaPeon/nexpress",
   "dependencies": {
     "js-cache": "~1.0.2",
-    "file": "*",
     "ssi": "0.1.5",
     "jsdoc": "3.2.0",
     "http": "*",
-    "mime-types": "*"
+    "mime-types": "*",
+    "file": "*"
+  },
+  "devDependencies": {
+    "superagent": "*",
+    "expect.js": "*"
   }
 }

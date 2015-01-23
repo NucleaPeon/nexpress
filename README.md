@@ -9,6 +9,7 @@ It also frees up the user to focus on how their site works.
 
 ### Recent Updates
 
+* 01/23/2015:  Added SSI
 * 01/22/2015:  Moved get and post to their own modules, added testing suite and most functionality added back in. (ssi todo)
 * 01/21/2015:  Reduced reliance on options, allowing more async performance
 * 01/14/2015:  Added template functionality (similar to SSI) to enable pages compiled from multiple sources. Use template keys as routes.
@@ -40,6 +41,22 @@ Optional Instantiation of nexpress:
 `(starting .js file)`
 
     var nexus = require('nexpress');
+
+### SSI
+
+SSI is the ability to compile multiple pieces of html code into one file.
+It is not specific to the web server, it's a compilation that can occur
+at any time.
+
+Nexpress enables the ssi() method both from your nexus and your http(s)
+objects. Use it like this:
+
+    nexus.ssi("input/", "output/", "*.shtml");
+
+or
+
+    http.ssi("input/", "output/", "*.shtml");
+
 
 
 ### Run Tests

@@ -59,3 +59,9 @@ describe('POST Routes', function() {
 
     });
 });
+
+describe('SSI', function() {
+    it('should exist', function() {
+        expect(nexus.ssi).to.exist;
+    });
+});

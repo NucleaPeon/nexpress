@@ -19,7 +19,7 @@ var mime = require('mime-types');
 var path = require('path');
 var fs = require('fs');
 var querystring = require('querystring');
-var ssi = require('ssi');
+var _ssi = require('ssi');
 
 (function() {
 
@@ -69,20 +69,35 @@ var ssi = require('ssi');
                 },
                 favicon: function(location, ctime) {
                     get.route("/favicon.ico", location, ctime);
+                    return location;
                 },
                 staticDir: function(location, alias, ctime) {
                     get.staticDir(location, alias, ctime);
+                    return alias;
+                },
+                ssi: function(input, output, regex) {
+                    var includes = new _ssi(input, output, regex);
+                    includes.compile();
+                    return output;
                 }
             }
 
         };
 
         this.https = function() {
-
+            return {
+                ssi: function(input, output, regex) {
+                    var includes = new _ssi(input, output, regex);
+                    includes.compile();
+                    return output;
+                }
+            };
         };
 
-        this.ssi = function() {
-
+        this.ssi = function(input, output, regex) {
+            var includes = new _ssi(input, output, regex);
+            includes.compile();
+            return output;
         };
 
 

@@ -2,6 +2,7 @@ var querystring = require('querystring');
 var fs = require('fs');
 var mime = require('mime-types');
 var path = require('path');
+var func = require('function.create');
 
 (function() {
 
@@ -16,6 +17,28 @@ var path = require('path');
             routes[address] = target;
         };
 
+        this.getRoutes = function() {
+            return routes;
+        }
+
+        this.error = function(code, message) {
+            res.writeHead(code, {"Content-Type": "application/json"});
+            res.end(JSON.stringify({"error": code, "message": message}));
+        }
+
+        this.page = function(page) {
+
+            return Function.create(null, function(req, res) {
+                res.writeHead(200, {"Content-Type": "text/html"});
+                fs.readFile(page, function(err, data) {
+                    if (err) throw err;
+                    res.write(data);
+                    res.end();
+                });
+
+            });
+        }
+
         this.go = function(req, res, cb) {
             var fullBody = '';
             req.on('data', function(chunk) {
@@ -27,23 +50,13 @@ var path = require('path');
             req.on('end', function() {
                 var form = querystring.parse(fullBody);
                 req.body = form;
-                if(cb === undefined) {
-                    console.log(req.url);
-                    fs.readFile(routes[req.url], function(err, data) {
-                        if (err) {
-                            res.writeHead(404, {"Content-Type": "text/plain"})
-                            res.end("" + err);
-                            throw err;
-                        }
-                        else {
-                            res.writeHead(200, {"Content-Type": mime.lookup(path.basename(routes[req.url]))})
-                            res.end(data);
-                        }
-                    });
+                console.log("Params: " + form);
+
+                if (routes[req.url] !== undefined) {
+                    routes[req.url](req, res);
                 }
                 else {
-                    console.log("Custom POST callback");
-                    cb(req, res, form);
+                    this.error(404, "Request to " + req.url + " not found");
                 }
             });
         }

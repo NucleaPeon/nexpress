@@ -60,7 +60,6 @@ var file = require('file');
 
         this.route = function(address, target, ctime) {
             if (ctime !== undefined) {
-                console.log(target);
                 fs.readFile(target, function(err, data) {
                     if (err) {
                         throw err;
@@ -128,7 +127,6 @@ var file = require('file');
                         //routes[path.sep + files[i]] = files[i];
                     }
                 }
-                console.log(routes);
             });
 
         }

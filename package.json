@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/NucleaPeon/nexpress",
   "dependencies": {
+    "function.create": "*",
     "js-cache": "~1.0.2",
     "ssi": "0.1.5",
     "jsdoc": "3.2.0",

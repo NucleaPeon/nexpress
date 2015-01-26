@@ -54,7 +54,9 @@ var _ssi = require('ssi');
                     get.go(req, res);
                 }
                 else if (req.method == "POST") {
-                    console.log("ignore");
+                    post.go(req, res, function() {
+                        console.log("done post http req " + req.url);
+                    });
                 }
                 else {
                     console.log("else");

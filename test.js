@@ -54,9 +54,15 @@ describe('GET Routes', function() {
     });
 });
 
+
+var post = new (require('./nexpress/lib/post.js'))();
 describe('POST Routes', function() {
     it('should return json data for example', function() {
-
+        expect(post.route).to.exist;
+        expect(post.routes).to.exist;
+        expect(post.go).to.exist;
+        post.route("/login");
+        expect(post.empty).to.exist;
     });
 });
 

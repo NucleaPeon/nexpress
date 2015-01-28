@@ -9,6 +9,7 @@ It also frees up the user to focus on how their site works.
 
 ### Recent Updates
 
+* 01/27/2015:  Added Post requests FROM nodejs apps to other sites
 * 01/26/2015:  Added built-in POST functionality that displays a webpage. Supply your own methods upon a POST for more functionality.
 * 01/23/2015:  Added SSI
 * 01/22/2015:  Moved get and post to their own modules, added testing suite and most functionality added back in. (ssi todo)

@@ -76,6 +76,14 @@ var _request = require('request');
             });
         }
 
+        /**
+         * The req and res objects are submitted through the go() method into the
+         * routing object.
+         *
+         * All POSTable objects require (req, res, data) parameters to be called.
+         * Return a Function object using Function.create(null, function(req, res, data) { ... });
+         * and it will get called appropriately.
+         */
         this.create = function(req, res, host, port, route, method, data, success, failure) {
             var url = 'http://' + host + ':' + port + route + method;
             _request.post(

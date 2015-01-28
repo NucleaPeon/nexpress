@@ -26,6 +26,10 @@ It also frees up the user to focus on how their site works.
 
     nexus.get.route("/", "./public/index.html");
     nexus.get.route("/404", "./errors/404.html");
+    nexus.post.route("/login", nexus.post.page("./auth/welcome.html"));
+
+    // nexus.post.page is a method that takes a file and writes it upon POSTing to that route.
+    // Many different method calls can be made via POST routes.
 
     http.listen(3000); // Defaults to 8080
 

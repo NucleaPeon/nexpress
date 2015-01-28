@@ -11,6 +11,24 @@ describe('Default Option Set', function(){
   });
 });
 
+var post = new (require('./nexpress/lib/post.js'))();
+describe('HTTP Method callables', function() {
+    it('should have the following', function() {
+        var http = nexus.http();
+        expect(http).to.exist;
+        expect(http.listen).to.exist;
+        expect(http.favicon).to.exist;
+        expect(http.staticDir).to.exist;
+        expect(http.ssi).to.exist;
+        expect(http.post).to.exist;
+
+        post.create('192.168.1.9', 2548, "/WebServices/UserWebService.asmx/GetCurrentUserDocument",
+                                        {},
+                                        function() { console.log("Success"); },
+                                        function() { console.log("Failure"); });
+    });
+});
+
 describe('Custom Option Set', function() {
     it('should detect change in options', function() {
         expect(nexus.options).to.exist;
@@ -26,7 +44,6 @@ describe('Custom Option Set', function() {
 
 var get = new (require('./nexpress/lib/get.js'))();
 describe('GET Routes', function() {
-
     it('should have default / -> ./index.html route to start', function() {
         expect(get).to.exist;
         expect(get.route).to.exist;
@@ -54,15 +71,13 @@ describe('GET Routes', function() {
     });
 });
 
-
-var post = new (require('./nexpress/lib/post.js'))();
 describe('POST Routes', function() {
     it('should return json data for example', function() {
-        expect(post.route).to.exist;
-        expect(post.routes).to.exist;
-        expect(post.go).to.exist;
+        expect(post.route).not.to.be(undefined);
+        expect(post.getRoutes).not.to.be(undefined);
+        expect(post.go).not.to.be(undefined);
         post.route("/login");
-        expect(post.empty).to.exist;
+        expect(Object.keys(post.getRoutes()).length).to.equal(1);
     });
 });
 

@@ -20,6 +20,7 @@ var path = require('path');
 var fs = require('fs');
 var querystring = require('querystring');
 var _ssi = require('ssi');
+var _request = require('request');
 
 (function() {
 
@@ -54,19 +55,16 @@ var _ssi = require('ssi');
                     get.go(req, res);
                 }
                 else if (req.method == "POST") {
-                    post.go(req, res, function() {
-                        console.log("done post http req " + req.url);
-                    });
+                    post.go(req, res);
                 }
                 else {
-                    console.log("else");
+                    console.log(req.method + " not supported");
                 }
             });
 
             var port = this.options.port;
             return {
                 listen: function(newport) {
-                    console.log("\t --- listening --- ");
                     return (newport === undefined) ? server.listen(port) : server.listen(newport);
                 },
                 favicon: function(location, ctime) {
@@ -82,9 +80,8 @@ var _ssi = require('ssi');
                     includes.compile();
                     return output;
                 }
-            }
-
-        };
+            };
+        }
 
         this.https = function() {
             return {

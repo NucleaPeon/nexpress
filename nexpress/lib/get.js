@@ -1,4 +1,4 @@
-var cache = require('js-cache');
+var _cache = require('js-cache');
 var path = require('path');
 var fs = require('fs');
 var mime = require('mime-types');
@@ -60,19 +60,14 @@ var file = require('file');
 
         this.route = function(address, target, ctime) {
             if (ctime !== undefined) {
-                fs.readFile(target, function(err, data) {
-                    if (err) {
-                        throw err;
-                    }
-                    cache.set(address, data, ctime);
-                });
+                this.cache
             }
             routes[address] = target;
         };
 
         this.remove = function(address) {
-            cache.get(address, function(value) {
-                cache.del(value);
+            _cache.get(address, function(value) {
+                _cache.del(value);
             });
             if (routes[address] !== undefined) {
                 delete routes[address];
@@ -94,7 +89,7 @@ var file = require('file');
         }
 
         this.serveCacheContent = function(url, res, failure) {
-            cache.get(url, function(value) {
+            _cache.get(url, function(value) {
                 displayAsHtml(res,
                             200,
                             {"Content-Type": mime.lookup(path.basename(routes[url]))},
@@ -102,6 +97,15 @@ var file = require('file');
                 return;
             });
             failure();
+        }
+
+        this.cache = function(address, target, time) {
+            fs.readFile(target, function(err, data) {
+                if (err) {
+                    throw err;
+                }
+                _cache.set(address, data, time);
+            });
         }
 
         this.staticDir = function(folder, alias, cacheTime) {
@@ -119,12 +123,21 @@ var file = require('file');
                     }
                     else if (files[i].substring(0, 1) == path.sep) {
                         // Absolute Paths
+                        if (cacheTime !== undefined) {
+                            this.cache(a + path.sep + filename,
+                                       files[i],
+                                       cacheTime);
+                        }
                         routes[a + path.sep + filename] = files[i];
                     }
                     else {
                         // Common use case: relative paths
+                        if (cacheTime !== undefined) {
+                            this.cache(a + path.sep + filename,
+                                       files[i],
+                                       cacheTime);
+                        }
                         routes[a + path.sep + filename] = files[i];
-                        //routes[path.sep + files[i]] = files[i];
                     }
                 }
             });
@@ -148,12 +161,13 @@ var file = require('file');
                 return; // With redirect, do no more
             };
             // Check cache for contents
-            var contents = cache.get(url);
+            var contents = _cache.get(url);
             if (contents === undefined) {
                 if (routes[url] === undefined) {
                     errors[404](url, res);
                 }
                 else {
+                    console.log("Reading route " + routes[url]);
                     this.readFile(routes[url], res);
                 }
 

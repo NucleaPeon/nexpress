@@ -4,8 +4,7 @@
   "description": "Not express.js, a quickstart module for serving web content",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test.js -R list",
-    "postinstall": "./node_modules/jsdoc/jsdoc ./nexpress/*.js ./nexpress/lib/*.js -d docs"
+    "test": "mocha test.js -R list"
   },
   "repository": {
     "type": "git",

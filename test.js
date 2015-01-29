@@ -12,6 +12,7 @@ describe('Default Option Set', function(){
 });
 
 var post = new (require('./nexpress/lib/post.js'))();
+//TODO: Create test that sets up a post http server we can talk to
 describe('HTTP Method callables', function() {
     it('should have the following', function() {
         var http = nexus.http();
@@ -21,11 +22,6 @@ describe('HTTP Method callables', function() {
         expect(http.staticDir).to.exist;
         expect(http.ssi).to.exist;
         expect(http.post).to.exist;
-
-        post.create('192.168.1.9', 2548, "/WebServices/UserWebService.asmx/GetCurrentUserDocument",
-                                        {},
-                                        function() { console.log("Success"); },
-                                        function() { console.log("Failure"); });
     });
 });
 

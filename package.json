@@ -4,7 +4,8 @@
   "description": "Not express.js, a quickstart module for serving web content",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test.js -R list"
+    "test": "mocha test.js -R list",
+    "postinstall": "./node_modules/jsdoc/jsdoc ./nexpress/*.js ./nexpress/lib/*.js -d docs"
   },
   "repository": {
     "type": "git",
@@ -21,11 +22,12 @@
   },
   "homepage": "https://github.com/NucleaPeon/nexpress",
   "dependencies": {
+    "node-simple-sessions": "NucleaPeon/node-simple-sessions",
     "function.create": "*",
     "request": "*",
     "js-cache": "~1.0.2",
     "ssi": "0.1.5",
-    "jsdoc": "3.2.0",
+    "jsdoc": "*",
     "http": "*",
     "mime-types": "*",
     "file": "*"

@@ -123,7 +123,7 @@ var _request = require('request');
                     res.end("<b>Post encountered an error, `page` not submitted</b>");
                 }
             },
-            error: function(req, res, e, responsedata) {
+            error: function(req, res, responsedata, e) {
                 res.writeHead(404, {"Content-Type": "text/html"});
                 res.end("<b>Post encountered an error: " + e + "</b>");
             },
@@ -167,7 +167,7 @@ var _request = require('request');
                     routes[req.url](req, res, form);
                 }
                 else {
-                    this.error(404, "Request to " + req.url + " not found");
+                    error(404, "Request to " + req.url + " not found");
                 }
             });
         }

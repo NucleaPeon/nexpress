@@ -91,10 +91,10 @@ var tls = require('tls');
 
             var server = _http.createServer(function(req, res) {
                 if (req.method == "GET") {
-                    get.go(req, res);
+                    _get.go(req, res);
                 }
                 else if (req.method == "POST") {
-                    post.go(req, res);
+                    _post.go(req, res);
                 }
                 else {
                     console.log(req.method + " not supported");
@@ -109,11 +109,11 @@ var tls = require('tls');
                     return (newport === undefined) ? server.listen(port) : server.listen(newport);
                 },
                 favicon: function(location, ctime) {
-                    get.route("/favicon.ico", location, ctime);
+                    _get.route("/favicon.ico", location, ctime);
                     return location;
                 },
                 staticDir: function(location, alias, ctime) {
-                    get.staticDir(location, alias, ctime);
+                    _get.staticDir(location, alias, ctime);
                     return alias;
                 },
                 ssi: function(input, output, regex) {

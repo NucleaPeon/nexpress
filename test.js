@@ -13,6 +13,9 @@ describe('Default Option Set', function(){
 
 var post = new (require('./nexpress/lib/post.js'))();
 //TODO: Create test that sets up a post http server we can talk to
+
+var get = new (require('./nexpress/lib/get.js'))();
+
 describe('HTTP Method callables', function() {
     it('should have the following', function() {
         var http = nexus.http();
@@ -22,6 +25,9 @@ describe('HTTP Method callables', function() {
         expect(http.staticDir).to.exist;
         expect(http.ssi).to.exist;
         expect(http.post).to.exist;
+        expect(http.get).to.exist;
+        expect(http.get.go).to.exist; // ensure object has method
+        expect(http.get.go).to.be.a('function');
     });
 });
 
@@ -37,8 +43,6 @@ describe('Custom Option Set', function() {
     });
 });
 
-
-var get = new (require('./nexpress/lib/get.js'))();
 describe('GET Routes', function() {
     it('should have default / -> ./index.html route to start', function() {
         expect(get).to.exist;

@@ -13,8 +13,6 @@
  */
 
 var _http = require('http');
-var get = new (require('./lib/get.js'))();
-var post = new (require('./lib/post.js'))();
 var mime = require('mime-types');
 var path = require('path');
 var fs = require('fs');
@@ -33,10 +31,6 @@ var _request = require('request');
 (function() {
 
     var nexus = function(options) {
-
-        this.get = get;
-        this.post = post;
-
         /** Default Options
          *  Port: 8080,
          *  timeout: 25000 (2.5 s)
@@ -91,6 +85,9 @@ var _request = require('request');
          */
         this.http = function() {
             // Create server that directs method requests to their appropriate parsers
+            var _get = new (require('./lib/get.js'))();
+            var _post = new (require('./lib/post.js'))();
+
             var server = _http.createServer(function(req, res) {
                 if (req.method == "GET") {
                     get.go(req, res);
@@ -122,7 +119,9 @@ var _request = require('request');
                     var includes = new _ssi(input, output, regex);
                     includes.compile();
                     return output;
-                }
+                },
+                post: _post,
+                get: _get
             };
         }
 

@@ -8,6 +8,8 @@ describe('Default Option Set', function(){
       expect(nexus.options).to.exist;
       expect(nexus.options.port).to.equal(8080);
       expect(nexus.options.timeout).to.equal(25000);
+      nexus.timeout(500000);
+      expect(nexus.options.timeout).to.equal(500000);
   });
 });
 
@@ -37,7 +39,7 @@ describe('Custom Option Set', function() {
         expect(nexus.options.port).to.equal(8080);
         nexus.port(3000);
         expect(nexus.options.port).to.equal(3000);
-        expect(nexus.options.timeout).to.equal(25000);
+        expect(nexus.options.timeout).to.equal(500000); // See first setting
         nexus.timeout(30000);
         expect(nexus.options.timeout).to.equal(30000);
     });
@@ -84,5 +86,14 @@ describe('POST Routes', function() {
 describe('SSI', function() {
     it('should exist', function() {
         expect(nexus.ssi).to.exist;
+    });
+});
+
+describe('HTTPS server', function() {
+    it('should be instantiable', function() {
+        expect(nexus.https).to.exist;
+        expect(nexus.https).to.be.a('function');
+        var https = nexus.https();
+        console.log(https);
     });
 });

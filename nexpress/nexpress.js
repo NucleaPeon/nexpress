@@ -19,6 +19,7 @@ var fs = require('fs');
 var querystring = require('querystring');
 var _ssi = require('ssi');
 var _request = require('request');
+var tls = require('tls');
 
 /**
  * Instantiation and export of the nexus function.
@@ -100,9 +101,9 @@ var _request = require('request');
                 }
             });
 
+            server.setTimeout(this.options.timeout);
             var port = this.options.port;
 
-            // RETURN
             return {
                 listen: function(newport) {
                     return (newport === undefined) ? server.listen(port) : server.listen(newport);
@@ -126,20 +127,49 @@ var _request = require('request');
         }
 
         /**
-         * Sets up an https server
+         * Sets up an https server. Secure HTTP server must have its port and
+         * credential files manually set. Currently is just an echo server.
          *
-         * @returns: {} with the following functions built in:
-         *      - ssi(): Compile files with ssi tags into expanded files using a regex
+         * See http://nodejs.org/api/tls.html#tls_tls_ssl
+         * for creating server keys
+         *
+         *
+         * @param privateKeyPath path to the private key for ssl
+         * @param certificatePath path to the certificate (public file)
+         * @param port for communicating securely (default: 8000)
+         *
+         * @returns JSON object with functions:
+         *      ssi: compile routes from an input directory into expanded files in output
+         *           using the matching object (regex) parameter.
          *
          */
         this.https = function() {
-            return {
-                ssi: function(input, output, regex) {
-                    var includes = new _ssi(input, output, regex);
-                    includes.compile();
-                    return output;
-                }
+            var _get = new (require('./lib/get.js'))();
+            var _post = new (require('./lib/post.js'))();
+
+
+            var httpsOptions = {
+                key: fs.readFileSync('./server-key.pem'),
+                cert: fs.readFileSync('./server-cert.pem'),
+                port: 8000
+
+                // This is necessary only if using the client certificate authentication.
+                //requestCert: true,
+
+                // This is necessary only if the client uses the self-signed certificate.
+                //ca: [ fs.readFileSync('client-cert.pem') ]
             };
+
+            var server = tls.createServer(httpsOptions, function(cleartextStream) {
+                console.log('server connected',
+                            cleartextStream.authorized ? 'authorized' : 'unauthorized');
+                cleartextStream.write("welcome!\n");
+                cleartextStream.setEncoding('utf8');
+                cleartextStream.pipe(cleartextStream);
+            });
+            server.listen(httpsOptions.port, function() {
+                console.log('server bound on ' + httpsOptions.port);
+            });
         };
 
         /**

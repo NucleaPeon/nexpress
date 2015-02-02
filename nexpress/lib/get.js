@@ -191,6 +191,8 @@ var file = require('file');
         }
 
         /**
+         * Variable function
+         *
          * Cache a file from the filesystem
          *
          * @param address the route that accesses the content, should be the same
@@ -198,7 +200,7 @@ var file = require('file');
          * @param target on the filesystem
          * @param time in milliseconds to cache the file
          */
-        this.cache = function(address, target, time) {
+        var cache = function(address, target, time) {
             fs.readFile(target, function(err, data) {
                 if (err) {
                     throw err;
@@ -237,7 +239,7 @@ var file = require('file');
                     else if (files[i].substring(0, 1) == path.sep) {
                         // Absolute Paths
                         if (cacheTime !== undefined) {
-                            this.cache(a + path.sep + filename,
+                            cache(a + path.sep + filename,
                                        files[i],
                                        cacheTime);
                         }
@@ -246,7 +248,7 @@ var file = require('file');
                     else {
                         // Common use case: relative paths
                         if (cacheTime !== undefined) {
-                            this.cache(a + path.sep + filename,
+                            cache(a + path.sep + filename,
                                        files[i],
                                        cacheTime);
                         }

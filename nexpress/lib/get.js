@@ -226,8 +226,8 @@ var file = require('file');
         this.staticDir = function(folder, alias, cacheTime) {
             var a = (alias === undefined) ? "" : alias;
             var filename = '';
-            if ((a.length > 0) && (a.substring(0, 1) != path.sep)) {
-                a = path.sep + alias;
+            if ((a.length > 0) && (a.substring(0, 1) != "/")) {
+                a = "/" + alias;
             }
             file.walk(folder, function(n, dirPath, dirs, files) {
                 for(var i=0; i<files.length; i++) {
@@ -239,20 +239,20 @@ var file = require('file');
                     else if (files[i].substring(0, 1) == path.sep) {
                         // Absolute Paths
                         if (cacheTime !== undefined) {
-                            cache(a + path.sep + filename,
+                            cache(a + "/" + filename,
                                        files[i],
                                        cacheTime);
                         }
-                        routes[a + path.sep + filename] = files[i];
+                        routes[a + "/" + filename] = files[i];
                     }
                     else {
                         // Common use case: relative paths
                         if (cacheTime !== undefined) {
-                            cache(a + path.sep + filename,
+                            cache(a + "/" + filename,
                                        files[i],
                                        cacheTime);
                         }
-                        routes[a + path.sep + filename] = files[i];
+                        routes[a + "/" + filename] = files[i];
                     }
                 }
             });

@@ -125,7 +125,7 @@ var _request = require('request');
             },
             error: function(req, res, responsedata, e) {
                 res.writeHead(404, {"Content-Type": "text/html"});
-                res.end("<b>Post encountered an error: " + e + "</b>");
+                res.end("<b>Post encountered an error: " + e + ", " + responsedata + "</b>");
             },
             ping: function(req, res, responsedata) {
                 res.writeHead(200, {"Content-Type": "application/json"});

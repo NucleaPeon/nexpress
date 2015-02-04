@@ -5,6 +5,7 @@ var path = require('path');
 var func = require('function.create');
 var _request = require('request');
 var tag = require('./tagparse.js');
+var Cookies = require('cookies');
 
 /**
  * Instantiation and export of the nexpress post function.
@@ -128,9 +129,15 @@ var tag = require('./tagparse.js');
                 fs.readFile(page, function(err, data) {
                     if (err) throw err;
 
+                    console.log("Unlocking session");
+                    console.log(tagmod);
                     var locext = page.split('.');
-                    if (tagmod !== null)
+                    if (tagmod !== null) {
+                        var cookies = new Cookies(req, res);
+                        sessioncookie = cookies.get("session_id");
+                        console.log(sessioncookie);
                         data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
+                    }
 
                     res.write(data);
                     res.end();

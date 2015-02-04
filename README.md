@@ -9,6 +9,7 @@ It also frees up the user to focus on how their site works.
 
 ### Recent Updates
 
+* 02/04/2015:  Added easier sessions (json), better authentication, and markup tags for grabbing session data onto the webpage
 * 01/29/2015:  Added jsdoc generation on postinstall, added in code documentation
 * 01/28/2015:  Created simple session and authentication modules to be used in this module
 * 01/27/2015:  Added Post requests FROM nodejs apps to other sites

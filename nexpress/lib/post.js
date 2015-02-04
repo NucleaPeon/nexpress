@@ -186,7 +186,7 @@ var Cookies = require('cookies');
             },
             ping: function(req, res, responsedata) {
                 res.writeHead(200, {"Content-Type": "application/json"});
-                res.end(JSON.stringify({ping: new Date()}));
+                res.end(JSON.stringify({date: new Date()}));
             }
 
         }

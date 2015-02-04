@@ -4,6 +4,7 @@ var fs = require('fs');
 var mime = require('mime-types');
 var _url = require('url');
 var file = require('file');
+var tag = require('./tagparse.js');
 
 /**
  * Instantiation and export of the nexpress get function.
@@ -24,10 +25,14 @@ var file = require('file');
             */
         var routes = {"/": "./index.html"};
 
+        var tagmod = null;
+
         /** Simple route table for redirects:
             * {"hosted address for page": "page to read"}
             */
         var redirects = {};
+
+        var session_ref = {};
 
         /**
          * Enables displaying of various pages with various codes (404, 200, etc),
@@ -74,6 +79,21 @@ var file = require('file');
                           "404 Page Not Found: <b>" + location + "</b>");
         }};
 
+        this.tagger = function(tag_module) {
+            tagmod = tag_module;
+        }
+
+        /**
+         * Sets the session object for GET requests. Some GET requests may access
+         * the session object, such as for tagging.
+         *
+         * @param session dictionary with session-held data in it.
+         *
+         */
+        this.session = function(session) {
+            session_ref = session;
+        }
+
         /**
          * Convenience method for displaying content from a file on the filesystem.
          *
@@ -84,13 +104,20 @@ var file = require('file');
          * error.
          */
         this.readFile = function(location, res) {
-            console.log("Attempting to read " + location);
+            console.log("Reading location " + location);
             fs.readFile(location, function(err, data) {
                 if(err) {
                     displayAsHtml(res, 404, {"Content-Type": "text/html"},
                         "404 Page Not Found: <b>" + location + "</b><code>" + err + "</code>");
                     throw err;
                 }
+
+                // Parse data for code-behind tags TODO here
+                var locext = location.split('.');
+                if (tagmod !== null)
+                    console.log("Changing data");
+                    data = tagmod.parseData(locext[locext.length - 1], data.toString('utf8'), session_ref).toString('binary');
+
                 displayAsHtml(res, 200, {"Content-Type": mime.lookup(path.basename(location))},
                     data);
             });
@@ -174,6 +201,10 @@ var file = require('file');
          */
         this.serveCacheContent = function(url, res, data) {
             _cache.get(url, function(value) {
+                // Parse data for code-behind tags TODO here
+                var locext = location.split('.');
+                if (tagmod !== null)
+                    tagmod.parseData(locext[locext.length - 1], data, session_ref);
                 displayAsHtml(res,
                             200,
                             {"Content-Type": mime.lookup(path.basename(routes[url]))},

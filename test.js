@@ -2,6 +2,7 @@ var request = require('superagent');
 var expect = require('expect.js');
 
 var nexus = require('./nexpress/nexpress.js');
+var func = require('function.create');
 
 describe('Default Option Set', function(){
   it('should be set to default options', function(){
@@ -93,7 +94,20 @@ describe('HTTPS server', function() {
     it('should be instantiable', function() {
         expect(nexus.https).to.exist;
         expect(nexus.https).to.be.a('function');
-        var https = nexus.https();
-        console.log(https);
     });
+});
+
+
+var tag = require('./nexpress/lib/tagparse.js');
+describe('HTML webpage tagging', function() {
+   it('should change code between tags', function() {
+       expect(get.tagger).to.exist;
+       expect(get.tagmod).to.exist;
+       expect(tag.parseList).to.exist;
+       expect(tag.parseData).to.exist;
+       get.tagger(tag);
+       var testdata = '<html><head></head><body>{{ "hello" }} {{ "world" }} {{console.log}}</body></html>';
+       tag.parseData(null, testdata, {'console.log': Function.create(null, function() { console.log("Hello World, This is Function"); return "Finished"; })});
+       
+   });
 });

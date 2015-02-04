@@ -20,6 +20,7 @@ var querystring = require('querystring');
 var _ssi = require('ssi');
 var _request = require('request');
 var tls = require('tls');
+var tagparse = require('./lib/tagparse.js');
 
 /**
  * Instantiation and export of the nexus function.
@@ -71,6 +72,10 @@ var tls = require('tls');
         this.error = function(err) {
             console.log("ERROR");
             console.log(err);
+        }
+
+        this.getSimpleTagger = function() {
+            return tagparse;
         }
 
         /**

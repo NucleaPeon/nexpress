@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/NucleaPeon/nexpress",
   "dependencies": {
-    "node-simple-sessions": "NucleaPeon/node-simple-sessions",
     "function.create": "*",
     "request": "*",
     "js-cache": "~1.0.2",
@@ -29,7 +28,8 @@
     "jsdoc": "*",
     "http": "*",
     "mime-types": "*",
-    "file": "*"
+    "file": "*",
+    "cookies": "*"
   },
   "devDependencies": {
     "superagent": "*",

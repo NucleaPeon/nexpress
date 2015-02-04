@@ -85,7 +85,9 @@ var tagparse = require('./lib/tagparse.js');
             var _get = new (require('./lib/get.js'))();
             var _post = new (require('./lib/post.js'))();
 
+
             var server = _http.createServer(function(req, res) {
+                console.log(cjar);
                 if (req.method == "GET") {
                     _get.go(req, res);
                 }

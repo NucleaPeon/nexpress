@@ -59,9 +59,9 @@ var tag = require('./tagparse.js');
             }
         }
 
-        var parseData = function() {
+        var parseData = function(extension, data, json) {
             console.log("Changing data");
-            return tagmod.parseData(locext[locext.length - 1], data.toString('utf8'), session_ref).toString('binary');
+            return tagmod.parseData(extension, data, json).toString('binary');
         }
 
         /**
@@ -120,7 +120,7 @@ var tag = require('./tagparse.js');
                 // Parse data for code-behind tags TODO here
                 var locext = location.split('.');
                 if (tagmod !== null)
-                    data = parseData(tagmod);
+                    data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
 
                 displayAsHtml(res, 200, {"Content-Type": mime.lookup(path.basename(location))},
                     data);

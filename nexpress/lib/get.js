@@ -59,6 +59,11 @@ var tag = require('./tagparse.js');
             }
         }
 
+        var parseData = function() {
+            console.log("Changing data");
+            return tagmod.parseData(locext[locext.length - 1], data.toString('utf8'), session_ref).toString('binary');
+        }
+
         /**
          * Convenience method calls for displaying errors.
          * It is recommended that the user build their own themed error pages
@@ -115,8 +120,7 @@ var tag = require('./tagparse.js');
                 // Parse data for code-behind tags TODO here
                 var locext = location.split('.');
                 if (tagmod !== null)
-                    console.log("Changing data");
-                    data = tagmod.parseData(locext[locext.length - 1], data.toString('utf8'), session_ref).toString('binary');
+                    data = parseData(tagmod);
 
                 displayAsHtml(res, 200, {"Content-Type": mime.lookup(path.basename(location))},
                     data);

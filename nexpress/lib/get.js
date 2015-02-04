@@ -190,7 +190,7 @@ var file = require('file');
          * @param res response object
          *
          */
-        this.extRedirect = function(address, res) {
+        var extRedirect = function(address, res) {
             var body = 'Redirecting to ' + address;
             res.writeHead(302, {
                 'Content-Type': 'text/plain',
@@ -329,11 +329,11 @@ var file = require('file');
             // Check redirects for url, then redirect response if found
             if (redirects[url] !== undefined) {
                 console.log("in redirects");
-                if ((value.substring(0, 7) == "http://") || (value.substring(0, 5) == "www.")) {
-                    extRedirect(value, res);
+                console.log("Reading url " + url);
+                if ((redirects[url].substring(0, 7) == "http://") || (redirects[url].substring(0, 5) == "www.")) {
+                    extRedirect(redirects[url], res);
                 }
                 else {
-                    console.log("Reading url " + url);
                     this.readFile(routes[url], res);
                 }
                 return; // With redirect, do no more

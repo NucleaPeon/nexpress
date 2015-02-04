@@ -30,10 +30,12 @@ this.parseData = function(fileext, data, json) {
             var slice = '';
             var index = 0;
             var myArray = data.match(re);
-            for(var i=0; i < myArray.length; i++) {
-                index = data.indexOf(myArray[i]);
-                slice = data.slice(index, index + myArray[i].length);
-                data = data.replace(slice, replaceWith(myArray[i], json));
+            if (myArray !== null) {
+                for(var i=0; i < myArray.length; i++) {
+                    index = data.indexOf(myArray[i]);
+                    slice = data.slice(index, index + myArray[i].length);
+                    data = data.replace(slice, replaceWith(myArray[i], json));
+                }
             }
             return data;
         }

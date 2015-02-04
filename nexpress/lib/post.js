@@ -4,6 +4,7 @@ var mime = require('mime-types');
 var path = require('path');
 var func = require('function.create');
 var _request = require('request');
+var tag = require('./tagparse.js');
 
 /**
  * Instantiation and export of the nexpress post function.
@@ -29,6 +30,10 @@ var _request = require('request');
          * @see wiki FIXME: link to wiki article
          */
         var routes = {};
+
+        var tagmod = null;
+
+        var session_ref = {};
 
         /**
          * Set a route from the address that links to the target.
@@ -67,12 +72,48 @@ var _request = require('request');
         }
 
         /**
+         * Sets the session object for GET requests. Some GET requests may access
+         * the session object, such as for tagging.
+         *
+         * @param session dictionary with session-held data in it.
+         *
+         */
+        this.session = function(s) {
+            session_ref = s;
+        }
+
+        /**
          * Responds to the caller in JSON format of the error and message
          * using {error: _____, message: ______}.
          */
         this.error = function(code, message) {
             res.writeHead(code, {"Content-Type": "application/json"});
             res.end(JSON.stringify({"error": code, "message": message}));
+        }
+
+        this.tagger = function(tag_module) {
+            tagmod = tag_module;
+        }
+
+        /**
+         * Method that is used to initiate tagging, where data in between a tag:
+         *   {{ ... }}
+         * is expanded to present data from the supplied json object or from
+         * strings within quotes.
+         *
+         * {{ "Hello World" }} ==> Hello World
+         * {{ json_key }} ==> json[json_key] (if method, call method w/ no params else display)
+         *
+         * @param extension of file to parse; this prevents tagging from being invoked on files
+         *                  that don't have tagging in them at all, but allows for specifying tag file types.
+         *                  Ex: images, binary files won't be looked in for tagging, but .html will.
+         * @param data the contents of which is in binary form and submitted to the response object
+         * @param json the session object usually, or a supplied dictionary/json.
+         *
+         * @returns encoded binary data with tags modified.
+         */
+        var parseData = function(extension, data, json) {
+            return tagmod.parseData(extension, data, json).toString('binary');
         }
 
         /**
@@ -82,11 +123,15 @@ var _request = require('request');
          * @param page on the local filesystem to read
          */
         this.page = function(page) {
-
             return Function.create(null, function(req, res) {
                 res.writeHead(200, {"Content-Type": "text/html"});
                 fs.readFile(page, function(err, data) {
                     if (err) throw err;
+
+                    var locext = page.split('.');
+                    if (tagmod !== null)
+                        data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
+
                     res.write(data);
                     res.end();
                 });
@@ -114,6 +159,11 @@ var _request = require('request');
                     res.writeHead(200, {"Content-Type": mime.lookup(path.basename(responsedata.page))});
                     fs.readFile(responsedata.page, function(err, data) {
                         if (err) throw err;
+
+                        var locext = responsedata.page.split('.');
+                        if (tagmod !== null)
+                            data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
+
                         res.write(data);
                         res.end();
                     });
@@ -214,7 +264,6 @@ var _request = require('request');
                             failure(req, res, err, data);
                         }
                         else {
-                            console.log(res);
                             respond.error(req, res, err, data);
                         }
                     }

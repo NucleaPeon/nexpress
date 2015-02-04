@@ -4,7 +4,6 @@ var fs = require('fs');
 var mime = require('mime-types');
 var _url = require('url');
 var file = require('file');
-var tag = require('./tagparse.js');
 
 /**
  * Instantiation and export of the nexpress get function.
@@ -59,8 +58,24 @@ var tag = require('./tagparse.js');
             }
         }
 
+        /**
+         * Method that is used to initiate tagging, where data in between a tag:
+         *   {{ ... }}
+         * is expanded to present data from the supplied json object or from
+         * strings within quotes.
+         *
+         * {{ "Hello World" }} ==> Hello World
+         * {{ json_key }} ==> json[json_key] (if method, call method w/ no params else display)
+         *
+         * @param extension of file to parse; this prevents tagging from being invoked on files
+         *                  that don't have tagging in them at all, but allows for specifying tag file types.
+         *                  Ex: images, binary files won't be looked in for tagging, but .html will.
+         * @param data the contents of which is in binary form and submitted to the response object
+         * @param json the session object usually, or a supplied dictionary/json.
+         *
+         * @returns encoded binary data with tags modified.
+         */
         var parseData = function(extension, data, json) {
-            console.log("Changing data");
             return tagmod.parseData(extension, data, json).toString('binary');
         }
 
@@ -109,7 +124,6 @@ var tag = require('./tagparse.js');
          * error.
          */
         this.readFile = function(location, res) {
-            console.log("Reading location " + location);
             fs.readFile(location, function(err, data) {
                 if(err) {
                     displayAsHtml(res, 404, {"Content-Type": "text/html"},
@@ -208,7 +222,7 @@ var tag = require('./tagparse.js');
                 // Parse data for code-behind tags TODO here
                 var locext = location.split('.');
                 if (tagmod !== null)
-                    tagmod.parseData(locext[locext.length - 1], data, session_ref);
+                    data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
                 displayAsHtml(res,
                             200,
                             {"Content-Type": mime.lookup(path.basename(routes[url]))},

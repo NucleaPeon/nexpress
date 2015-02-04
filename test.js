@@ -9,7 +9,7 @@ describe('Default Option Set', function(){
       expect(nexus.options).to.exist;
       expect(nexus.options.port).to.equal(8080);
       expect(nexus.options.timeout).to.equal(25000);
-      nexus.timeout(500000);
+      nexus.option('timeout', 500000);
       expect(nexus.options.timeout).to.equal(500000);
   });
 });

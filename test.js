@@ -37,11 +37,12 @@ describe('HTTP Method callables', function() {
 describe('Custom Option Set', function() {
     it('should detect change in options', function() {
         expect(nexus.options).to.exist;
+        expect(nexus.option).to.exist;
         expect(nexus.options.port).to.equal(8080);
-        nexus.port(3000);
+        nexus.option('port', 3000);
         expect(nexus.options.port).to.equal(3000);
         expect(nexus.options.timeout).to.equal(500000); // See first setting
-        nexus.timeout(30000);
+        nexus.option('timeout', 30000);
         expect(nexus.options.timeout).to.equal(30000);
     });
 });
@@ -108,6 +109,6 @@ describe('HTML webpage tagging', function() {
        get.tagger(tag);
        var testdata = '<html><head></head><body>{{ "hello" }} {{ "world" }} {{console.log}}</body></html>';
        tag.parseData(null, testdata, {'console.log': Function.create(null, function() { console.log("Hello World, This is Function"); return "Finished"; })});
-       
+
    });
 });

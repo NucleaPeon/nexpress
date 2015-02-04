@@ -43,23 +43,14 @@ var tagparse = require('./lib/tagparse.js');
         };
 
         /**
-         * Set the default port (affects all http(s) servers)
+         * Set the default option (affects all http(s) servers)
          *
-         * @params: value: int value of the port to use
+         * @param key string of the key in the options json
+         * @param value (type) value of the option to set
          */
-        this.port = function(value) {
+        this.option = function(key, value) {
             if (value !== undefined)
-                this.options.port = value;
-        }
-
-        /**
-         * Set the default timeout (affects all http(s) servers)
-         *
-         * @params: value: int value of timeout to use
-         */
-        this.timeout = function(value) {
-            if (value !== undefined)
-                this.options.timeout = value;
+                this.options[key] = value;
         }
 
         /**

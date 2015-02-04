@@ -28,8 +28,7 @@
     "jsdoc": "*",
     "http": "*",
     "mime-types": "*",
-    "file": "*",
-    "cookies": "*"
+    "file": "*"
   },
   "devDependencies": {
     "superagent": "*",

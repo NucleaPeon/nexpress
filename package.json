@@ -1,6 +1,6 @@
 {
   "name": "nexpress",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Not express.js, a quickstart module for serving web content",
   "main": "index.js",
   "scripts": {

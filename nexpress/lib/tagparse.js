@@ -25,20 +25,27 @@ var replaceWith = function(word, json) {
 }
 
 this.parseData = function(fileext, data, json) {
+    data = data.toString('utf8');
     for (var i=0; i < parseList.length; i++) {
         if (fileext == parseList[i]) {
             var slice = '';
             var index = 0;
             var myArray = data.match(re);
-            if (myArray !== null) {
+            if ((myArray !== undefined) && (myArray !== null)) {
+
                 for(var i=0; i < myArray.length; i++) {
                     index = data.indexOf(myArray[i]);
                     slice = data.slice(index, index + myArray[i].length);
                     data = data.replace(slice, replaceWith(myArray[i], json));
                 }
             }
-            return data;
+            data = data.toString('binary');
+            break;
+        }
+        else {
+            console.log("extension not in array: " + fileext);
         }
     }
+    return data;
 
 }

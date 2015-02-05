@@ -4,6 +4,12 @@ var fs = require('fs');
 var mime = require('mime-types');
 var _url = require('url');
 var file = require('file');
+var Cookies = require('cookies');
+
+// TODO: If get methods are using get.page(), enable caching
+
+// TODO - Like staticDir, secure() should enable a directory of files
+// that are only accessible via a session object.
 
 /**
  * Instantiation and export of the nexpress get function.
@@ -76,7 +82,7 @@ var file = require('file');
          * @returns encoded binary data with tags modified.
          */
         var parseData = function(extension, data, json) {
-            return tagmod.parseData(extension, data, json).toString('binary');
+            return contents = tagmod.parseData(extension, data, json);
         }
 
         /**
@@ -133,8 +139,9 @@ var file = require('file');
 
                 // Parse data for code-behind tags TODO here
                 var locext = location.split('.');
+                console.log(locext);
                 if (tagmod !== null)
-                    data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
+                   data = parseData(locext[locext.length - 1], data, session_ref);
 
                 displayAsHtml(res, 200, {"Content-Type": mime.lookup(path.basename(location))},
                     data);
@@ -211,6 +218,31 @@ var file = require('file');
         }
 
         /**
+         * JSON method to read a page and present it
+         * Returns a method reference for get.go to parse.
+         *
+         * @param page on the local filesystem to read
+         */
+        this.page = function(page) {
+            return Function.create(null, function(req, res) {
+                res.writeHead(200, {"Content-Type": "text/html"});
+                fs.readFile(page, function(err, data) {
+                    if (err) throw err;
+
+                    var locext = page.split('.');
+                    if (tagmod !== null) {
+                        var cookies = new Cookies(req, res);
+                        sessioncookie = cookies.get("session_id");
+                        data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
+                    }
+
+                    res.write(data);
+                    res.end();
+                });
+            });
+        }
+
+        /**
          * Attempts to serve cached content
          *
          * @param url target route on the web server
@@ -250,12 +282,14 @@ var file = require('file');
          * @param time in milliseconds to cache the file
          */
         var cache = function(address, target, time) {
-            fs.readFile(target, function(err, data) {
-                if (err) {
-                    throw err;
-                }
-                _cache.set(address, data, time);
-            });
+            if (! routes[address] instanceof Function) {
+                fs.readFile(target, function(err, data) {
+                    if (err) {
+                        throw err;
+                    }
+                    _cache.set(address, data, time);
+                });
+            }
         }
 
         /**
@@ -328,8 +362,7 @@ var file = require('file');
             var url = url_parts.pathname;
             // Check redirects for url, then redirect response if found
             if (redirects[url] !== undefined) {
-                console.log("in redirects");
-                console.log("Reading url " + url);
+                // Determine if string (default behaviour) or method (secure)
                 if ((redirects[url].substring(0, 7) == "http://") || (redirects[url].substring(0, 5) == "www.")) {
                     extRedirect(redirects[url], res);
                 }
@@ -345,8 +378,12 @@ var file = require('file');
                     errors[404](url, res); // no content, so leave undefined
                 }
                 else {
-                    console.log("Reading route " + routes[url]);
-                    this.readFile(routes[url], res);
+                    if (routes[url] instanceof Function) {
+                        routes[url](req, res); // FIXME: maybe place get queries into data?
+                    }
+                    else {
+                        this.readFile(routes[url], res);
+                    }
                 }
 
             }

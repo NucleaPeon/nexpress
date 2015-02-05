@@ -129,13 +129,10 @@ var Cookies = require('cookies');
                 fs.readFile(page, function(err, data) {
                     if (err) throw err;
 
-                    console.log("Unlocking session");
-                    console.log(tagmod);
                     var locext = page.split('.');
                     if (tagmod !== null) {
                         var cookies = new Cookies(req, res);
                         sessioncookie = cookies.get("session_id");
-                        console.log(sessioncookie);
                         data = parseData(locext[locext.length - 1], data.toString('utf8'), session_ref);
                     }
 

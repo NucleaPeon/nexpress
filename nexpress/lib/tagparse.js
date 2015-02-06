@@ -43,7 +43,6 @@ this.parseData = function(fileext, data, json) {
             break;
         }
         else {
-            console.log("extension not in array: " + fileext);
         }
     }
     return data;

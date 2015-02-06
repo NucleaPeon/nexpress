@@ -129,7 +129,7 @@ var Cookies = require('cookies');
          * If an error occurs, error page will display the message and then through the
          * error.
          */
-        this.readFile = function(location, res) {
+        var readFile = function(location, res) {
             fs.readFile(location, function(err, data) {
                 if(err) {
                     displayAsHtml(res, 404, {"Content-Type": "text/html"},
@@ -139,7 +139,6 @@ var Cookies = require('cookies');
 
                 // Parse data for code-behind tags TODO here
                 var locext = location.split('.');
-                console.log(locext);
                 if (tagmod !== null)
                    data = parseData(locext[locext.length - 1], data, session_ref);
 
@@ -367,7 +366,7 @@ var Cookies = require('cookies');
                     extRedirect(redirects[url], res);
                 }
                 else {
-                    this.readFile(routes[url], res);
+                    readFile(routes[url], res);
                 }
                 return; // With redirect, do no more
             };
@@ -382,7 +381,7 @@ var Cookies = require('cookies');
                         routes[url](req, res); // FIXME: maybe place get queries into data?
                     }
                     else {
-                        this.readFile(routes[url], res);
+                        readFile(routes[url], res);
                     }
                 }
 

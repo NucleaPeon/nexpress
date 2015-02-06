@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/NucleaPeon/nexpress",
   "dependencies": {
+    "request": "*",
     "cookies" : "*",
     "function.create": "*",
     "request": "*",

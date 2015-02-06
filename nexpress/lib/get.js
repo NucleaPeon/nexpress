@@ -2,6 +2,7 @@ var _cache = require('js-cache');
 var path = require('path');
 var fs = require('fs');
 var mime = require('mime-types');
+var _request = require('request');
 var _url = require('url');
 var file = require('file');
 var Cookies = require('cookies');
@@ -393,6 +394,19 @@ var Cookies = require('cookies');
                             {"Content-Type": mime.lookup(path.basename(routes[url]))},
                             contents);
             }
+        }
+
+        this.create = function(req, res, host, port, route, method, data, success, failure) {
+            console.log("Creating GET");
+            var url = 'http://' + host + ':' + port + route + method;
+            console.log(url);
+            _request.get(url)
+                .on('response', function(response) {
+                    console.log(response.statusCode) // 200
+                    console.log(response.headers['content-type']) // 'image/png'
+                })
+                .pipe("Hello World");
+            );
         }
 
         return this;

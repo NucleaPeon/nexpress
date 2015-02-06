@@ -184,6 +184,12 @@ var Cookies = require('cookies');
             ping: function(req, res, responsedata) {
                 res.writeHead(200, {"Content-Type": "application/json"});
                 res.end(JSON.stringify({date: new Date()}));
+            },
+            logger: function(req, res, data) {
+                console.log(req);
+                console.log(res);
+                console.log(data);
+                res.end();
             }
 
         }
@@ -248,8 +254,9 @@ var Cookies = require('cookies');
          * @param failure callback on failure (optional) requires parameters "req", "res", "error" and "data"
          */
         this.create = function(req, res, host, port, route, method, data, success, failure) {
-            var respond = this.respond;
+            console.log("Creating POST");
             var url = 'http://' + host + ':' + port + route + method;
+            console.log(url);
             _request.post(
                 url,
                 {form: data},
@@ -260,15 +267,19 @@ var Cookies = require('cookies');
                     if (!err && response.statusCode == 200) {
                         if (success !== undefined)
                             success(req, res, data);
-                        else
-                            respond.displayJSON(req, res, data);
+                        else {
+                            res.writeHead(404, {"Content-Type": "application/json"});
+                            res.end(JSON.stringify({error: "no success method"});
+                        }
                     }
                     else {
                         if (failure !== undefined) {
-                            failure(req, res, err, data);
+                            res.writeHead(404, {"Content-Type": "application/json"});
+                            res.end(JSON.stringify({error: "an error occured or status code not 200"});
                         }
                         else {
-                            respond.error(req, res, err, data);
+                            res.writeHead(404, {"Content-Type": "application/json"});
+                            res.end(JSON.stringify({error: "no failure method"});
                         }
                     }
                 }

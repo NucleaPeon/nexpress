@@ -164,14 +164,15 @@ var Cookies = require('cookies');
 
         /**
          * Sets a route and if a ctime (cache time) is submitted, caches that object.
+         * Does not work with function supplied parameters.
          *
          * @param address to the route. Ex: "/"
          * @param target when the route is invoked. Ex: "./index.html"
          * @param ctime optional time in milliseconds for caching. Ex: 3600000
          */
         this.route = function(address, target, ctime) {
-            if (ctime !== undefined) {
-                this.cache
+            if ((ctime !== undefined) && (typeof(target) != "function")) {
+                cache(address, target, ctime);
             }
             routes[address] = target;
         };

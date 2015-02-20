@@ -269,17 +269,17 @@ var Cookies = require('cookies');
                             success(req, res, data);
                         else {
                             res.writeHead(404, {"Content-Type": "application/json"});
-                            res.end(JSON.stringify({error: "no success method"});
+                            res.end(JSON.stringify({error: "no success method"}));
                         }
                     }
                     else {
                         if (failure !== undefined) {
                             res.writeHead(404, {"Content-Type": "application/json"});
-                            res.end(JSON.stringify({error: "an error occured or status code not 200"});
+                            res.end(JSON.stringify({error: "an error occured or status code not 200"}));
                         }
                         else {
                             res.writeHead(404, {"Content-Type": "application/json"});
-                            res.end(JSON.stringify({error: "no failure method"});
+                            res.end(JSON.stringify({error: "no failure method"}));
                         }
                     }
                 }

@@ -406,7 +406,6 @@ var Cookies = require('cookies');
                     console.log(response.headers['content-type']) // 'image/png'
                 })
                 .pipe("Hello World");
-            );
         }
 
         return this;

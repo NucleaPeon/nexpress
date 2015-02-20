@@ -138,12 +138,15 @@ var Cookies = require('cookies');
                     throw err;
                 }
 
+                var mtype = mime.lookup(path.basename(location))
+
                 // Parse data for code-behind tags TODO here
                 var locext = location.split('.');
-                if (tagmod !== null)
+                // ONLY TAG PARSE WHEN IT IS IN HTML!
+                if ((tagmod !== null) && (mtype == "text/html"))
                    data = parseData(locext[locext.length - 1], data, session_ref);
 
-                displayAsHtml(res, 200, {"Content-Type": mime.lookup(path.basename(location))},
+                displayAsHtml(res, 200, {"Content-Type": mtype},
                     data);
             });
         }
@@ -320,17 +323,8 @@ var Cookies = require('cookies');
                     if (filename.substring(0, 1) == ".") {
                         continue;
                     }
-                    else if (files[i].substring(0, 1) == path.sep) {
-                        // Absolute Paths
-                        if (cacheTime !== undefined) {
-                            cache(a + "/" + filename,
-                                       files[i],
-                                       cacheTime);
-                        }
-                        routes[a + "/" + filename] = files[i];
-                    }
                     else {
-                        // Common use case: relative paths
+                        // Absolute Paths
                         if (cacheTime !== undefined) {
                             cache(a + "/" + filename,
                                        files[i],

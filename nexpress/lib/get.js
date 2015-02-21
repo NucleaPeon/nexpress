@@ -374,7 +374,7 @@ var Cookies = require('cookies');
                 }
                 else {
                     if (routes[url] instanceof Function) {
-                        routes[url](req, res); // FIXME: maybe place get queries into data?
+                        routes[url](req, res, url_parts.query);
                     }
                     else {
                         readFile(routes[url], res);

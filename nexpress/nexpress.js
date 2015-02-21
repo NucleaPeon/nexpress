@@ -16,7 +16,6 @@ var _http = require('http');
 var mime = require('mime-types');
 var path = require('path');
 var fs = require('fs');
-var querystring = require('querystring');
 var _ssi = require('ssi');
 var _request = require('request');
 var tls = require('tls');

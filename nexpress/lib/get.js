@@ -317,20 +317,29 @@ var Cookies = require('cookies');
                 a = "/" + alias;
             }
             file.walk(folder, function(n, dirPath, dirs, files) {
-                for(var i=0; i<files.length; i++) {
-                    filename = files[i].split(path.sep);
-                    filename = filename[filename.length - 1];
-                    if (filename.substring(0, 1) == ".") {
-                        continue;
-                    }
-                    else {
-                        // Absolute Paths
-                        if (cacheTime !== undefined) {
-                            cache(a + "/" + filename,
-                                       files[i],
-                                       cacheTime);
+                if (files.length === undefined) {
+                    console.log("Error: No files found in " + dirPath);
+                    console.log("Dirs:");
+                    console.log(dirs);
+                    console.log("n");
+                    console.log(n);
+                }
+                else {
+                    for(var i=0; i<files.length; i++) {
+                        filename = files[i].split(path.sep);
+                        filename = filename[filename.length - 1];
+                        if (filename.substring(0, 1) == ".") {
+                            continue;
                         }
-                        routes[a + "/" + filename] = files[i];
+                        else {
+                            // Absolute Paths
+                            if (cacheTime !== undefined) {
+                                cache(a + "/" + filename,
+                                        files[i],
+                                        cacheTime);
+                            }
+                            routes[a + "/" + filename] = files[i];
+                        }
                     }
                 }
             });

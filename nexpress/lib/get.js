@@ -317,8 +317,8 @@ var Cookies = require('cookies');
                 a = "/" + alias;
             }
             file.walk(folder, function(n, dirPath, dirs, files) {
-                if (files.length === undefined) {
-                    console.log("Error: No files found in " + dirPath);
+                if (files === undefined) {
+                    console.log("Error: No files found in " + dirPath + " for static directory");
                     console.log("Dirs:");
                     console.log(dirs);
                     console.log("n");
